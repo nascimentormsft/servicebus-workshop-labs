@@ -121,11 +121,11 @@ az servicebus topic subscription rule create \
   --filter-sql-expression "eventType = 'GateChange' AND airport = 'AMS'"
 ```
 
-### Step 6 — Verify Rules in the Portal
+### Step 6 — Verify Filters in the Portal
 
 1. Navigate to **Topics** → `flight-operations`
 2. Click on the `delay-management` subscription
-3. Go to **Rules** — you should see `delay-and-cancellation-filter`
+3. Expand **Filters** group — you should see `delay-and-cancellation-filter`
 4. Repeat for `gate-management-ams`
 
 ### Step 7 — Send Test Messages
