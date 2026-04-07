@@ -59,8 +59,11 @@ az servicebus namespace create \
   --name $NAMESPACE \
   --resource-group $RG \
   --sku Standard \
-  --location westeurope
+  --location westeurope \
+  --disable-local-auth false
 ```
+
+> **Why `--disable-local-auth false`?** This explicitly enables SAS key (local) authentication, which is required for **Service Bus Explorer** in the Azure Portal. Without it, you won't be able to send/receive/peek messages through the portal.
 
 ### Step 4 — Verify the Namespace in the Portal
 
