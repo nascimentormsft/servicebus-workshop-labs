@@ -16,7 +16,7 @@ Transavia's booking engine processes thousands of reservations daily. Each booki
 |------|------------------|--------------------|--------|-------|
 | **Basic** | 256 KB | — | 1,000 | Lowest |
 | **Standard** | 256 KB | 1–80 GB | 10,000 | Mid |
-| **Premium** | 100 MB | 1–4 TB | 10,000 | Highest |
+| **Premium** | 1 MB | 1–4 TB | 10,000 | Highest |
 
 **For this lab:** Standard tier is sufficient. In production, Premium would be chosen for mission-critical booking flows due to dedicated resources and predictable latency.
 
