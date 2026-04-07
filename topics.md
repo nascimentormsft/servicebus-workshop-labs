@@ -1,0 +1,28 @@
+- Create Azure Service Bus
+    - Show Service Bus Queues
+    - Show Topics
+- Features
+    - Sessions
+    - Duplicate detection
+    - Filtering messages
+- Message Browsing
+    - Show how it works and outline it is useful for troubleshooting
+- Message Locks and Settlement
+    - How it works
+- Setting TTL
+    - Per message bases
+    - Queue/topic level
+- Advanced features
+    - Dead-letter queues
+    - Delaying Message Processing with deferral
+    - Prefetch Messages
+    - Auto-Forwarding
+    - Throttling
+    - Partitioning
+- Security
+    - Security Center
+    - Managed Identity
+    - Shared Access Signatures
+- Monitoring and Troubleshooting 
+    - Azure Monitor
+    - Setting up alerts and notifications
