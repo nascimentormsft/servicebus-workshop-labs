@@ -24,13 +24,22 @@ When a flight's status changes (e.g., delayed, gate changed, cancelled), multipl
 
 ## Exercise Steps
 
+### Step 0 — Set Environment Variables
+
+If you haven't already, or if you're starting a new terminal session, set the variables from Lab 01:
+
+```bash
+NAMESPACE="sb-transavia-workshop-<your-initials>"
+RG="rg-servicebus-workshop"
+```
+
 ### Step 1 — Create a Topic for Flight Status Updates
 
 ```bash
 az servicebus topic create \
   --name flight-status-updates \
-  --namespace-name sb-transavia-workshop-<your-initials> \
-  --resource-group rg-servicebus-workshop \
+  --namespace-name $NAMESPACE \
+  --resource-group $RG \
   --max-size 1024 \
   --default-message-time-to-live P7D
 ```
@@ -42,32 +51,32 @@ az servicebus topic create \
 az servicebus topic subscription create \
   --name passenger-notifications \
   --topic-name flight-status-updates \
-  --namespace-name sb-transavia-workshop-<your-initials> \
-  --resource-group rg-servicebus-workshop \
+  --namespace-name $NAMESPACE \
+  --resource-group $RG \
   --default-message-time-to-live P3D
 
 # Crew management system
 az servicebus topic subscription create \
   --name crew-management \
   --topic-name flight-status-updates \
-  --namespace-name sb-transavia-workshop-<your-initials> \
-  --resource-group rg-servicebus-workshop \
+  --namespace-name $NAMESPACE \
+  --resource-group $RG \
   --default-message-time-to-live P3D
 
 # Airport display boards
 az servicebus topic subscription create \
   --name display-boards \
   --topic-name flight-status-updates \
-  --namespace-name sb-transavia-workshop-<your-initials> \
-  --resource-group rg-servicebus-workshop \
+  --namespace-name $NAMESPACE \
+  --resource-group $RG \
   --default-message-time-to-live PT6H
 
 # Ground handling operations
 az servicebus topic subscription create \
   --name ground-handling \
   --topic-name flight-status-updates \
-  --namespace-name sb-transavia-workshop-<your-initials> \
-  --resource-group rg-servicebus-workshop \
+  --namespace-name $NAMESPACE \
+  --resource-group $RG \
   --default-message-time-to-live P1D
 ```
 
@@ -78,8 +87,8 @@ az servicebus topic subscription create \
 ```bash
 az servicebus topic subscription list \
   --topic-name flight-status-updates \
-  --namespace-name sb-transavia-workshop-<your-initials> \
-  --resource-group rg-servicebus-workshop \
+  --namespace-name $NAMESPACE \
+  --resource-group $RG \
   --output table
 ```
 

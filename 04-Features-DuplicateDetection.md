@@ -23,13 +23,22 @@ The payment gateway for Transavia's booking system occasionally retries transact
 
 ## Exercise Steps
 
+### Step 0 — Set Environment Variables
+
+If you haven't already, or if you're starting a new terminal session, set the variables from Lab 01:
+
+```bash
+NAMESPACE="sb-transavia-workshop-<your-initials>"
+RG="rg-servicebus-workshop"
+```
+
 ### Step 1 — Create a Queue with Duplicate Detection Enabled
 
 ```bash
 az servicebus queue create \
   --name payment-transactions \
-  --namespace-name sb-transavia-workshop-<your-initials> \
-  --resource-group rg-servicebus-workshop \
+  --namespace-name $NAMESPACE \
+  --resource-group $RG \
   --enable-duplicate-detection true \
   --duplicate-detection-history-time-window P1D
 ```
@@ -102,8 +111,8 @@ Using Service Bus Explorer:
 ```bash
 az servicebus queue show \
   --name payment-transactions \
-  --namespace-name sb-transavia-workshop-<your-initials> \
-  --resource-group rg-servicebus-workshop \
+  --namespace-name $NAMESPACE \
+  --resource-group $RG \
   --query "{activeMessageCount: countDetails.activeMessageCount, duplicateDetection: requiresDuplicateDetection, duplicateWindow: duplicateDetectionHistoryTimeWindow}"
 ```
 
@@ -112,8 +121,8 @@ az servicebus queue show \
 ```bash
 az servicebus queue show \
   --name payment-transactions \
-  --namespace-name sb-transavia-workshop-<your-initials> \
-  --resource-group rg-servicebus-workshop \
+  --namespace-name $NAMESPACE \
+  --resource-group $RG \
   --query "countDetails.activeMessageCount" \
   --output tsv
 ```

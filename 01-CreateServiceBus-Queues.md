@@ -33,73 +33,82 @@ Transavia's booking engine processes thousands of reservations daily. Each booki
 
 ## Exercise Steps
 
-### Step 1 — Create a Resource Group
+### Step 1 — Set Environment Variables
+
+Run this once at the start of the workshop. These variables will be used throughout **all labs**.
+
+```bash
+NAMESPACE="sb-transavia-workshop-<your-initials>"
+RG="rg-servicebus-workshop"
+```
+
+> **Note:** Replace `<your-initials>` with your actual initials (e.g., `sb-transavia-workshop-rn`). Namespace names must be globally unique.
+
+### Step 2 — Create a Resource Group
 
 ```bash
 az group create \
-  --name rg-servicebus-workshop \
+  --name $RG \
   --location westeurope
 ```
 
-### Step 2 — Create a Service Bus Namespace
+### Step 3 — Create a Service Bus Namespace
 
 ```bash
 az servicebus namespace create \
-  --name sb-transavia-workshop-<your-initials> \
-  --resource-group rg-servicebus-workshop \
+  --name $NAMESPACE \
+  --resource-group $RG \
   --sku Standard \
   --location westeurope
 ```
 
-> **Note:** Namespace names must be globally unique. Append your initials or a random suffix.
-
-### Step 3 — Verify the Namespace in the Portal
+### Step 4 — Verify the Namespace in the Portal
 
 1. Open the [Azure Portal](https://portal.azure.com)
-2. Navigate to **Resource Groups** → `rg-servicebus-workshop`
+2. Navigate to **Resource Groups** → your resource group
 3. Click on the Service Bus namespace
 4. Observe the **Overview** blade: note the tier, location, and FQDN
 
-### Step 4 — Create a Queue for Booking Confirmations
+### Step 5 — Create a Queue for Booking Confirmations
 
 ```bash
 az servicebus queue create \
   --name booking-confirmations \
-  --namespace-name sb-transavia-workshop-<your-initials> \
-  --resource-group rg-servicebus-workshop \
+  --namespace-name $NAMESPACE \
+  --resource-group $RG \
   --max-size 1024 \
   --default-message-time-to-live P14D
 ```
 
 > The `--default-message-time-to-live P14D` sets the default TTL to 14 days (ISO 8601 duration).
 
-### Step 5 — Create a Second Queue for Baggage Processing
+### Step 6 — Create a Second Queue for Baggage Processing
 
 ```bash
 az servicebus queue create \
   --name baggage-processing \
-  --namespace-name sb-transavia-workshop-<your-initials> \
-  --resource-group rg-servicebus-workshop \
+  --namespace-name $NAMESPACE \
+  --resource-group $RG \
   --max-size 2048 \
   --enable-dead-lettering-on-message-expiration true
 ```
 
-### Step 6 — List All Queues
+### Step 7 — List All Queues
 
 ```bash
 az servicebus queue list \
-  --namespace-name sb-transavia-workshop-<your-initials> \
-  --resource-group rg-servicebus-workshop \
+  --namespace-name $NAMESPACE \
+  --resource-group $RG \
   --output table
 ```
 
-### Step 7 — Inspect Queue Properties
+### Step 8 — Inspect Queue Properties
 
 ```bash
 az servicebus queue show \
   --name booking-confirmations \
-  --namespace-name sb-transavia-workshop-<your-initials> \
-  --resource-group rg-servicebus-workshop
+  --namespace-name $NAMESPACE \
+  --resource-group $RG
 ```
 
 Review the JSON output and identify:
@@ -108,7 +117,7 @@ Review the JSON output and identify:
 - `lockDuration`
 - `deadLetteringOnMessageExpiration`
 
-### Step 8 — Send a Test Message via Service Bus Explorer
+### Step 9 — Send a Test Message via Service Bus Explorer
 
 1. In the Azure Portal, navigate to your Service Bus namespace
 2. Click on **Queues** → `booking-confirmations`
@@ -131,14 +140,14 @@ Review the JSON output and identify:
 
 7. Click **Send**
 
-### Step 9 — Peek at the Message
+### Step 10 — Peek at the Message
 
 1. In Service Bus Explorer, switch to **Peek** mode
 2. Click **Peek from start**
 3. Verify the message content matches what you sent
 4. Note that peeking does NOT remove the message from the queue
 
-### Step 10 — Receive the Message
+### Step 11 — Receive the Message
 
 1. Switch to **Receive** mode
 2. Select **ReceiveAndDelete** mode

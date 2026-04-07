@@ -24,12 +24,21 @@ Transavia contracts ground handling services at different airports. These third-
 
 ## Exercise Steps
 
+### Step 0 — Set Environment Variables
+
+If you haven't already, or if you're starting a new terminal session, set the variables from Lab 01:
+
+```bash
+NAMESPACE="sb-transavia-workshop-<your-initials>"
+RG="rg-servicebus-workshop"
+```
+
 ### Step 1 — View the Default Namespace-Level SAS Policy
 
 ```bash
 az servicebus namespace authorization-rule list \
-  --namespace-name sb-transavia-workshop-<your-initials> \
-  --resource-group rg-servicebus-workshop \
+  --namespace-name $NAMESPACE \
+  --resource-group $RG \
   --output table
 ```
 
@@ -41,8 +50,8 @@ You'll see `RootManageSharedAccessKey` with Manage + Send + Listen rights.
 
 ```bash
 az servicebus namespace authorization-rule keys list \
-  --namespace-name sb-transavia-workshop-<your-initials> \
-  --resource-group rg-servicebus-workshop \
+  --namespace-name $NAMESPACE \
+  --resource-group $RG \
   --name RootManageSharedAccessKey \
   --query "{primaryKey: primaryKey, secondaryKey: secondaryKey, primaryConnectionString: primaryConnectionString}" 
 ```
@@ -55,19 +64,19 @@ az servicebus namespace authorization-rule keys list \
 # First, ensure the baggage-routing queue exists
 az servicebus queue show \
   --name baggage-routing \
-  --namespace-name sb-transavia-workshop-<your-initials> \
-  --resource-group rg-servicebus-workshop 2>/dev/null || \
+  --namespace-name $NAMESPACE \
+  --resource-group $RG 2>/dev/null || \
 az servicebus queue create \
   --name baggage-routing \
-  --namespace-name sb-transavia-workshop-<your-initials> \
-  --resource-group rg-servicebus-workshop
+  --namespace-name $NAMESPACE \
+  --resource-group $RG
 
 # Create a Send-only policy for the ground handler
 az servicebus queue authorization-rule create \
   --name ground-handler-send \
   --queue-name baggage-routing \
-  --namespace-name sb-transavia-workshop-<your-initials> \
-  --resource-group rg-servicebus-workshop \
+  --namespace-name $NAMESPACE \
+  --resource-group $RG \
   --rights Send
 ```
 
@@ -77,8 +86,8 @@ az servicebus queue authorization-rule create \
 az servicebus queue authorization-rule create \
   --name internal-consumer-listen \
   --queue-name baggage-routing \
-  --namespace-name sb-transavia-workshop-<your-initials> \
-  --resource-group rg-servicebus-workshop \
+  --namespace-name $NAMESPACE \
+  --resource-group $RG \
   --rights Listen
 ```
 
@@ -87,8 +96,8 @@ az servicebus queue authorization-rule create \
 ```bash
 az servicebus queue authorization-rule list \
   --queue-name baggage-routing \
-  --namespace-name sb-transavia-workshop-<your-initials> \
-  --resource-group rg-servicebus-workshop \
+  --namespace-name $NAMESPACE \
+  --resource-group $RG \
   --output table
 ```
 
@@ -98,8 +107,8 @@ az servicebus queue authorization-rule list \
 az servicebus queue authorization-rule keys list \
   --name ground-handler-send \
   --queue-name baggage-routing \
-  --namespace-name sb-transavia-workshop-<your-initials> \
-  --resource-group rg-servicebus-workshop \
+  --namespace-name $NAMESPACE \
+  --resource-group $RG \
   --query "primaryConnectionString" -o tsv
 ```
 
@@ -121,8 +130,8 @@ az servicebus queue authorization-rule keys list \
 az servicebus queue authorization-rule keys renew \
   --name ground-handler-send \
   --queue-name baggage-routing \
-  --namespace-name sb-transavia-workshop-<your-initials> \
-  --resource-group rg-servicebus-workshop \
+  --namespace-name $NAMESPACE \
+  --resource-group $RG \
   --key PrimaryKey
 ```
 
@@ -139,21 +148,21 @@ az servicebus queue authorization-rule keys renew \
 az servicebus queue authorization-rule create \
   --name swissport-ams-send \
   --queue-name baggage-routing \
-  --namespace-name sb-transavia-workshop-<your-initials> \
-  --resource-group rg-servicebus-workshop \
+  --namespace-name $NAMESPACE \
+  --resource-group $RG \
   --rights Send
 
 # Create a separate queue for another partner
 az servicebus queue create \
   --name ground-ops-rtm \
-  --namespace-name sb-transavia-workshop-<your-initials> \
-  --resource-group rg-servicebus-workshop
+  --namespace-name $NAMESPACE \
+  --resource-group $RG
 
 az servicebus queue authorization-rule create \
   --name menzies-rtm-send \
   --queue-name ground-ops-rtm \
-  --namespace-name sb-transavia-workshop-<your-initials> \
-  --resource-group rg-servicebus-workshop \
+  --namespace-name $NAMESPACE \
+  --resource-group $RG \
   --rights Send
 ```
 
@@ -165,8 +174,8 @@ When a ground handling contract ends:
 az servicebus queue authorization-rule delete \
   --name swissport-ams-send \
   --queue-name baggage-routing \
-  --namespace-name sb-transavia-workshop-<your-initials> \
-  --resource-group rg-servicebus-workshop
+  --namespace-name $NAMESPACE \
+  --resource-group $RG
 ```
 
 > Deleting the policy immediately revokes all access — any connection strings derived from this policy stop working.

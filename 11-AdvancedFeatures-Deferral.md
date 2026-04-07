@@ -22,13 +22,22 @@ Aircraft turnaround involves a sequence: cabin cleaning → catering → fueling
 
 ## Exercise Steps
 
+### Step 0 — Set Environment Variables
+
+If you haven't already, or if you're starting a new terminal session, set the variables from Lab 01:
+
+```bash
+NAMESPACE="sb-transavia-workshop-<your-initials>"
+RG="rg-servicebus-workshop"
+```
+
 ### Step 1 — Create a Queue for Turnaround Tasks
 
 ```bash
 az servicebus queue create \
   --name aircraft-turnaround \
-  --namespace-name sb-transavia-workshop-<your-initials> \
-  --resource-group rg-servicebus-workshop \
+  --namespace-name $NAMESPACE \
+  --resource-group $RG \
   --lock-duration PT1M \
   --default-message-time-to-live P1D
 ```
@@ -102,8 +111,8 @@ Using Service Bus Explorer, send these messages **in this order** (intentionally
 ```bash
 az servicebus queue show \
   --name aircraft-turnaround \
-  --namespace-name sb-transavia-workshop-<your-initials> \
-  --resource-group rg-servicebus-workshop \
+  --namespace-name $NAMESPACE \
+  --resource-group $RG \
   --query "{active: countDetails.activeMessageCount, scheduled: countDetails.scheduledMessageCount, transfer: countDetails.transferMessageCount}"
 ```
 

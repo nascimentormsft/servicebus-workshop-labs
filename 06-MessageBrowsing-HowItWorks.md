@@ -22,6 +22,15 @@ Transavia's ground handling system has stopped processing baggage routing messag
 
 ## Exercise Steps
 
+### Step 0 — Set Environment Variables
+
+If you haven't already, or if you're starting a new terminal session, set the variables from Lab 01:
+
+```bash
+NAMESPACE="sb-transavia-workshop-<your-initials>"
+RG="rg-servicebus-workshop"
+```
+
 ### Step 1 — Set Up the Scenario
 
 Create a queue and populate it with several messages simulating a stuck system:
@@ -29,8 +38,8 @@ Create a queue and populate it with several messages simulating a stuck system:
 ```bash
 az servicebus queue create \
   --name baggage-routing \
-  --namespace-name sb-transavia-workshop-<your-initials> \
-  --resource-group rg-servicebus-workshop \
+  --namespace-name $NAMESPACE \
+  --resource-group $RG \
   --max-size 1024
 ```
 
@@ -117,8 +126,8 @@ Using Service Bus Explorer, send the following messages to `baggage-routing`:
 ```bash
 az servicebus queue show \
   --name baggage-routing \
-  --namespace-name sb-transavia-workshop-<your-initials> \
-  --resource-group rg-servicebus-workshop \
+  --namespace-name $NAMESPACE \
+  --resource-group $RG \
   --query "countDetails.activeMessageCount"
 ```
 
@@ -166,8 +175,8 @@ When a consumer stops processing messages, use this investigation sequence:
 # CLI: Check dead-letter count
 az servicebus queue show \
   --name baggage-routing \
-  --namespace-name sb-transavia-workshop-<your-initials> \
-  --resource-group rg-servicebus-workshop \
+  --namespace-name $NAMESPACE \
+  --resource-group $RG \
   --query "countDetails.deadLetterMessageCount"
 ```
 

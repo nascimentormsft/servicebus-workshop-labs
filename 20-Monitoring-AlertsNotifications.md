@@ -30,6 +30,15 @@ Proactive alerting ensures the platform team can respond before passengers or op
 
 ## Exercise Steps
 
+### Step 0 — Set Environment Variables
+
+If you haven't already, or if you're starting a new terminal session, set the variables from Lab 01:
+
+```bash
+NAMESPACE="sb-transavia-workshop-<your-initials>"
+RG="rg-servicebus-workshop"
+```
+
 ### Step 1 — Create an Action Group
 
 Action groups define WHO gets notified and HOW:
@@ -37,7 +46,7 @@ Action groups define WHO gets notified and HOW:
 ```bash
 az monitor action-group create \
   --name ag-servicebus-ops \
-  --resource-group rg-servicebus-workshop \
+  --resource-group $RG \
   --short-name sb-ops \
   --action email ops-team ops-team@transavia.com
 ```
@@ -54,13 +63,13 @@ This alert fires when ANY dead-lettered messages appear — indicating processin
 
 ```bash
 SB_ID=$(az servicebus namespace show \
-  --name sb-transavia-workshop-<your-initials> \
-  --resource-group rg-servicebus-workshop \
+  --name $NAMESPACE \
+  --resource-group $RG \
   --query id -o tsv)
 
 az monitor metrics alert create \
   --name "alert-deadletter-detected" \
-  --resource-group rg-servicebus-workshop \
+  --resource-group $RG \
   --scopes $SB_ID \
   --condition "total DeadletteredMessages > 0" \
   --window-size 5m \
@@ -75,7 +84,7 @@ az monitor metrics alert create \
 ```bash
 az monitor metrics alert create \
   --name "alert-message-backlog" \
-  --resource-group rg-servicebus-workshop \
+  --resource-group $RG \
   --scopes $SB_ID \
   --condition "avg ActiveMessages > 1000" \
   --window-size 15m \
@@ -90,7 +99,7 @@ az monitor metrics alert create \
 ```bash
 az monitor metrics alert create \
   --name "alert-throttling" \
-  --resource-group rg-servicebus-workshop \
+  --resource-group $RG \
   --scopes $SB_ID \
   --condition "total ThrottledRequests > 0" \
   --window-size 5m \
@@ -107,7 +116,7 @@ az monitor metrics alert create \
 ```bash
 az monitor metrics alert create \
   --name "alert-server-errors" \
-  --resource-group rg-servicebus-workshop \
+  --resource-group $RG \
   --scopes $SB_ID \
   --condition "total ServerErrors > 5" \
   --window-size 5m \
@@ -121,7 +130,7 @@ az monitor metrics alert create \
 
 ```bash
 az monitor metrics alert list \
-  --resource-group rg-servicebus-workshop \
+  --resource-group $RG \
   --output table
 ```
 
@@ -209,7 +218,7 @@ If you want to clean up all workshop resources:
 
 ```bash
 # WARNING: This deletes EVERYTHING in the resource group
-# az group delete --name rg-servicebus-workshop --yes --no-wait
+# az group delete --name $RG --yes --no-wait
 ```
 
 > Only run this after confirming with your instructor that the workshop is complete.

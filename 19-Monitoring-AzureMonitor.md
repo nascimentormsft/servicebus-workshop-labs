@@ -25,6 +25,15 @@ Transavia's platform team needs to monitor the health of all Service Bus queues 
 
 ## Exercise Steps
 
+### Step 0 — Set Environment Variables
+
+If you haven't already, or if you're starting a new terminal session, set the variables from Lab 01:
+
+```bash
+NAMESPACE="sb-transavia-workshop-<your-initials>"
+RG="rg-servicebus-workshop"
+```
+
 ### Step 1 — Explore Built-in Metrics
 
 1. Navigate to your Service Bus namespace in the Portal
@@ -73,19 +82,19 @@ Transavia's platform team needs to monitor the health of all Service Bus queues 
 # Create a Log Analytics workspace (if you don't have one)
 az monitor log-analytics workspace create \
   --workspace-name law-servicebus-workshop \
-  --resource-group rg-servicebus-workshop \
+  --resource-group $RG \
   --location westeurope
 
 # Get the workspace ID
 WORKSPACE_ID=$(az monitor log-analytics workspace show \
   --workspace-name law-servicebus-workshop \
-  --resource-group rg-servicebus-workshop \
+  --resource-group $RG \
   --query id -o tsv)
 
 # Get Service Bus namespace resource ID
 SB_ID=$(az servicebus namespace show \
-  --name sb-transavia-workshop-<your-initials> \
-  --resource-group rg-servicebus-workshop \
+  --name $NAMESPACE \
+  --resource-group $RG \
   --query id -o tsv)
 
 # Enable diagnostic settings

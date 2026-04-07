@@ -24,6 +24,15 @@ Hardcoded connection strings and SAS keys in application code are a major securi
 
 ## Exercise Steps
 
+### Step 0 — Set Environment Variables
+
+If you haven't already, or if you're starting a new terminal session, set the variables from Lab 01:
+
+```bash
+NAMESPACE="sb-transavia-workshop-<your-initials>"
+RG="rg-servicebus-workshop"
+```
+
 ### Step 1 — Understand Authentication Methods
 
 ```
@@ -45,8 +54,8 @@ Method 2: Managed Identity ✅ Recommended
 ```bash
 # List all SAS authorization rules
 az servicebus namespace authorization-rule list \
-  --namespace-name sb-transavia-workshop-<your-initials> \
-  --resource-group rg-servicebus-workshop \
+  --namespace-name $NAMESPACE \
+  --resource-group $RG \
   --output table
 ```
 
@@ -77,7 +86,7 @@ We'll create a simple Azure Function app concept (simulated via CLI):
 # Create a user-assigned managed identity (simulating an app identity)
 az identity create \
   --name mi-booking-processor \
-  --resource-group rg-servicebus-workshop \
+  --resource-group $RG \
   --location westeurope
 ```
 
@@ -87,13 +96,13 @@ az identity create \
 # Get the identity's principal ID
 PRINCIPAL_ID=$(az identity show \
   --name mi-booking-processor \
-  --resource-group rg-servicebus-workshop \
+  --resource-group $RG \
   --query principalId -o tsv)
 
 # Get the Service Bus namespace resource ID
 SB_ID=$(az servicebus namespace show \
-  --name sb-transavia-workshop-<your-initials> \
-  --resource-group rg-servicebus-workshop \
+  --name $NAMESPACE \
+  --resource-group $RG \
   --query id -o tsv)
 
 # Assign "Azure Service Bus Data Receiver" role
@@ -109,12 +118,12 @@ az role assignment create \
 # Create a sender identity (simulating the booking engine)
 az identity create \
   --name mi-booking-engine \
-  --resource-group rg-servicebus-workshop \
+  --resource-group $RG \
   --location westeurope
 
 SENDER_PRINCIPAL=$(az identity show \
   --name mi-booking-engine \
-  --resource-group rg-servicebus-workshop \
+  --resource-group $RG \
   --query principalId -o tsv)
 
 # Assign "Azure Service Bus Data Sender" role
@@ -141,8 +150,8 @@ For least-privilege, scope roles to individual queues instead of the namespace:
 # Get queue resource ID
 QUEUE_ID=$(az servicebus queue show \
   --name booking-confirmations \
-  --namespace-name sb-transavia-workshop-<your-initials> \
-  --resource-group rg-servicebus-workshop \
+  --namespace-name $NAMESPACE \
+  --resource-group $RG \
   --query id -o tsv)
 
 # Assign receiver role only for booking-confirmations queue

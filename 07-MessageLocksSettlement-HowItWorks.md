@@ -25,13 +25,22 @@ Transavia's crew scheduling system assigns crew members to flights. When a sched
 
 ## Exercise Steps
 
+### Step 0 — Set Environment Variables
+
+If you haven't already, or if you're starting a new terminal session, set the variables from Lab 01:
+
+```bash
+NAMESPACE="sb-transavia-workshop-<your-initials>"
+RG="rg-servicebus-workshop"
+```
+
 ### Step 1 — Create a Queue with a Custom Lock Duration
 
 ```bash
 az servicebus queue create \
   --name crew-assignments \
-  --namespace-name sb-transavia-workshop-<your-initials> \
-  --resource-group rg-servicebus-workshop \
+  --namespace-name $NAMESPACE \
+  --resource-group $RG \
   --lock-duration PT30S \
   --max-delivery-count 3
 ```
@@ -125,8 +134,8 @@ While Message 1 is locked:
 ```bash
 az servicebus queue show \
   --name crew-assignments \
-  --namespace-name sb-transavia-workshop-<your-initials> \
-  --resource-group rg-servicebus-workshop \
+  --namespace-name $NAMESPACE \
+  --resource-group $RG \
   --query "{active: countDetails.activeMessageCount, deadLetter: countDetails.deadLetterMessageCount}"
 ```
 

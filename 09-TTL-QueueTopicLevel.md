@@ -29,30 +29,39 @@ Setting TTL at the queue/topic level establishes a baseline policy that applies 
 
 ## Exercise Steps
 
+### Step 0 — Set Environment Variables
+
+If you haven't already, or if you're starting a new terminal session, set the variables from Lab 01:
+
+```bash
+NAMESPACE="sb-transavia-workshop-<your-initials>"
+RG="rg-servicebus-workshop"
+```
+
 ### Step 1 — Create Queues with Different TTL Policies
 
 ```bash
 # Operational alerts — 24-hour retention
 az servicebus queue create \
   --name operational-alerts \
-  --namespace-name sb-transavia-workshop-<your-initials> \
-  --resource-group rg-servicebus-workshop \
+  --namespace-name $NAMESPACE \
+  --resource-group $RG \
   --default-message-time-to-live P1D \
   --enable-dead-lettering-on-message-expiration true
 
 # Maintenance work orders — 30-day retention
 az servicebus queue create \
   --name maintenance-workorders \
-  --namespace-name sb-transavia-workshop-<your-initials> \
-  --resource-group rg-servicebus-workshop \
+  --namespace-name $NAMESPACE \
+  --resource-group $RG \
   --default-message-time-to-live P30D \
   --enable-dead-lettering-on-message-expiration true
 
 # Real-time telemetry — 1-hour retention
 az servicebus queue create \
   --name telemetry-data \
-  --namespace-name sb-transavia-workshop-<your-initials> \
-  --resource-group rg-servicebus-workshop \
+  --namespace-name $NAMESPACE \
+  --resource-group $RG \
   --default-message-time-to-live PT1H \
   --enable-dead-lettering-on-message-expiration false
 ```
@@ -75,8 +84,8 @@ az servicebus queue create \
 # Create topic for flight data distribution
 az servicebus topic create \
   --name flight-data \
-  --namespace-name sb-transavia-workshop-<your-initials> \
-  --resource-group rg-servicebus-workshop \
+  --namespace-name $NAMESPACE \
+  --resource-group $RG \
   --default-message-time-to-live P7D
 ```
 
@@ -87,24 +96,24 @@ Create subscriptions with different TTLs:
 az servicebus topic subscription create \
   --name dashboard \
   --topic-name flight-data \
-  --namespace-name sb-transavia-workshop-<your-initials> \
-  --resource-group rg-servicebus-workshop \
+  --namespace-name $NAMESPACE \
+  --resource-group $RG \
   --default-message-time-to-live PT2H
 
 # Analytics subscription — needs longer retention (7 days, inherits from topic)
 az servicebus topic subscription create \
   --name analytics \
   --topic-name flight-data \
-  --namespace-name sb-transavia-workshop-<your-initials> \
-  --resource-group rg-servicebus-workshop \
+  --namespace-name $NAMESPACE \
+  --resource-group $RG \
   --default-message-time-to-live P7D
 
 # Compliance subscription — needs maximum retention (30 days)
 az servicebus topic subscription create \
   --name compliance \
   --topic-name flight-data \
-  --namespace-name sb-transavia-workshop-<your-initials> \
-  --resource-group rg-servicebus-workshop \
+  --namespace-name $NAMESPACE \
+  --resource-group $RG \
   --default-message-time-to-live P30D
 ```
 
@@ -143,8 +152,8 @@ Peek the message in each subscription and compare the effective TTL:
 ```bash
 az servicebus queue update \
   --name operational-alerts \
-  --namespace-name sb-transavia-workshop-<your-initials> \
-  --resource-group rg-servicebus-workshop \
+  --namespace-name $NAMESPACE \
+  --resource-group $RG \
   --default-message-time-to-live PT12H
 ```
 
@@ -155,8 +164,8 @@ az servicebus queue update \
 ```bash
 az servicebus queue show \
   --name operational-alerts \
-  --namespace-name sb-transavia-workshop-<your-initials> \
-  --resource-group rg-servicebus-workshop \
+  --namespace-name $NAMESPACE \
+  --resource-group $RG \
   --query "defaultMessageTimeToLive"
 ```
 

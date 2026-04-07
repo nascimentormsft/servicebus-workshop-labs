@@ -26,13 +26,22 @@ Transavia's baggage tracking system processes barcode scans at every touchpoint:
 
 ## Exercise Steps
 
+### Step 0 — Set Environment Variables
+
+If you haven't already, or if you're starting a new terminal session, set the variables from Lab 01:
+
+```bash
+NAMESPACE="sb-transavia-workshop-<your-initials>"
+RG="rg-servicebus-workshop"
+```
+
 ### Step 1 — Create a Partitioned Queue
 
 ```bash
 az servicebus queue create \
   --name baggage-tracking-partitioned \
-  --namespace-name sb-transavia-workshop-<your-initials> \
-  --resource-group rg-servicebus-workshop \
+  --namespace-name $NAMESPACE \
+  --resource-group $RG \
   --enable-partitioning true \
   --max-size 4096
 ```
@@ -42,8 +51,8 @@ az servicebus queue create \
 ```bash
 az servicebus queue create \
   --name baggage-tracking-standard \
-  --namespace-name sb-transavia-workshop-<your-initials> \
-  --resource-group rg-servicebus-workshop \
+  --namespace-name $NAMESPACE \
+  --resource-group $RG \
   --enable-partitioning false \
   --max-size 1024
 ```
@@ -54,15 +63,15 @@ az servicebus queue create \
 # Partitioned queue
 az servicebus queue show \
   --name baggage-tracking-partitioned \
-  --namespace-name sb-transavia-workshop-<your-initials> \
-  --resource-group rg-servicebus-workshop \
+  --namespace-name $NAMESPACE \
+  --resource-group $RG \
   --query "{name: name, partitioning: enablePartitioning, maxSize: maxSizeInMegabytes}"
 
 # Non-partitioned queue
 az servicebus queue show \
   --name baggage-tracking-standard \
-  --namespace-name sb-transavia-workshop-<your-initials> \
-  --resource-group rg-servicebus-workshop \
+  --namespace-name $NAMESPACE \
+  --resource-group $RG \
   --query "{name: name, partitioning: enablePartitioning, maxSize: maxSizeInMegabytes}"
 ```
 
@@ -144,8 +153,8 @@ Using Service Bus Explorer, send to `baggage-tracking-partitioned`:
 ```bash
 az servicebus topic create \
   --name baggage-events-partitioned \
-  --namespace-name sb-transavia-workshop-<your-initials> \
-  --resource-group rg-servicebus-workshop \
+  --namespace-name $NAMESPACE \
+  --resource-group $RG \
   --enable-partitioning true
 ```
 

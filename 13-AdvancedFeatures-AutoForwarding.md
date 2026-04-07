@@ -30,27 +30,36 @@ Auto-forwarding connects these stages without consumer code needing to explicitl
 
 ## Exercise Steps
 
+### Step 0 — Set Environment Variables
+
+If you haven't already, or if you're starting a new terminal session, set the variables from Lab 01:
+
+```bash
+NAMESPACE="sb-transavia-workshop-<your-initials>"
+RG="rg-servicebus-workshop"
+```
+
 ### Step 1 — Create the Pipeline Queues
 
 ```bash
 # Stage 3: Notification (create first — it's the destination)
 az servicebus queue create \
   --name disruption-notification \
-  --namespace-name sb-transavia-workshop-<your-initials> \
-  --resource-group rg-servicebus-workshop
+  --namespace-name $NAMESPACE \
+  --resource-group $RG
 
 # Stage 2: Processing (forwards to notification)
 az servicebus queue create \
   --name disruption-processing \
-  --namespace-name sb-transavia-workshop-<your-initials> \
-  --resource-group rg-servicebus-workshop \
+  --namespace-name $NAMESPACE \
+  --resource-group $RG \
   --forward-to disruption-notification
 
 # Stage 1: Triage (forwards to processing)
 az servicebus queue create \
   --name disruption-triage \
-  --namespace-name sb-transavia-workshop-<your-initials> \
-  --resource-group rg-servicebus-workshop \
+  --namespace-name $NAMESPACE \
+  --resource-group $RG \
   --forward-to disruption-processing
 ```
 
@@ -87,22 +96,22 @@ After sending, check where the message ended up:
 # Stage 1: Triage — should be 0 (auto-forwarded)
 az servicebus queue show \
   --name disruption-triage \
-  --namespace-name sb-transavia-workshop-<your-initials> \
-  --resource-group rg-servicebus-workshop \
+  --namespace-name $NAMESPACE \
+  --resource-group $RG \
   --query "countDetails.activeMessageCount"
 
 # Stage 2: Processing — should be 0 (auto-forwarded)
 az servicebus queue show \
   --name disruption-processing \
-  --namespace-name sb-transavia-workshop-<your-initials> \
-  --resource-group rg-servicebus-workshop \
+  --namespace-name $NAMESPACE \
+  --resource-group $RG \
   --query "countDetails.activeMessageCount"
 
 # Stage 3: Notification — should be 1 (final destination)
 az servicebus queue show \
   --name disruption-notification \
-  --namespace-name sb-transavia-workshop-<your-initials> \
-  --resource-group rg-servicebus-workshop \
+  --namespace-name $NAMESPACE \
+  --resource-group $RG \
   --query "countDetails.activeMessageCount"
 ```
 
@@ -116,21 +125,21 @@ A common pattern: fan-out from a topic, then forward specific subscriptions to d
 # Create a priority disruption queue
 az servicebus queue create \
   --name disruption-priority \
-  --namespace-name sb-transavia-workshop-<your-initials> \
-  --resource-group rg-servicebus-workshop
+  --namespace-name $NAMESPACE \
+  --resource-group $RG
 
 # Create a topic for all disruptions
 az servicebus topic create \
   --name all-disruptions \
-  --namespace-name sb-transavia-workshop-<your-initials> \
-  --resource-group rg-servicebus-workshop
+  --namespace-name $NAMESPACE \
+  --resource-group $RG
 
 # Create a subscription that auto-forwards severe disruptions to the priority queue
 az servicebus topic subscription create \
   --name severe-disruptions \
   --topic-name all-disruptions \
-  --namespace-name sb-transavia-workshop-<your-initials> \
-  --resource-group rg-servicebus-workshop \
+  --namespace-name $NAMESPACE \
+  --resource-group $RG \
   --forward-to disruption-priority
 
 # Add a filter: only cancellations and long delays
@@ -138,15 +147,15 @@ az servicebus topic subscription rule delete \
   --name '$Default' \
   --subscription-name severe-disruptions \
   --topic-name all-disruptions \
-  --namespace-name sb-transavia-workshop-<your-initials> \
-  --resource-group rg-servicebus-workshop
+  --namespace-name $NAMESPACE \
+  --resource-group $RG
 
 az servicebus topic subscription rule create \
   --name severe-filter \
   --subscription-name severe-disruptions \
   --topic-name all-disruptions \
-  --namespace-name sb-transavia-workshop-<your-initials> \
-  --resource-group rg-servicebus-workshop \
+  --namespace-name $NAMESPACE \
+  --resource-group $RG \
   --filter-sql-expression "type = 'Cancellation' OR delayMinutes > 120"
 ```
 
@@ -171,8 +180,8 @@ Verify the message lands in `disruption-priority` queue:
 ```bash
 az servicebus queue show \
   --name disruption-priority \
-  --namespace-name sb-transavia-workshop-<your-initials> \
-  --resource-group rg-servicebus-workshop \
+  --namespace-name $NAMESPACE \
+  --resource-group $RG \
   --query "countDetails.activeMessageCount"
 ```
 
@@ -181,8 +190,8 @@ az servicebus queue show \
 ```bash
 az servicebus queue update \
   --name disruption-triage \
-  --namespace-name sb-transavia-workshop-<your-initials> \
-  --resource-group rg-servicebus-workshop \
+  --namespace-name $NAMESPACE \
+  --resource-group $RG \
   --forward-to ""
 ```
 

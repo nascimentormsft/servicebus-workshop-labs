@@ -29,13 +29,22 @@ Subscription filters let each subscriber define which messages they receive, red
 
 ## Exercise Steps
 
+### Step 0 — Set Environment Variables
+
+If you haven't already, or if you're starting a new terminal session, set the variables from Lab 01:
+
+```bash
+NAMESPACE="sb-transavia-workshop-<your-initials>"
+RG="rg-servicebus-workshop"
+```
+
 ### Step 1 — Create the Flight Operations Topic
 
 ```bash
 az servicebus topic create \
   --name flight-operations \
-  --namespace-name sb-transavia-workshop-<your-initials> \
-  --resource-group rg-servicebus-workshop \
+  --namespace-name $NAMESPACE \
+  --resource-group $RG \
   --max-size 1024
 ```
 
@@ -46,22 +55,22 @@ az servicebus topic create \
 az servicebus topic subscription create \
   --name delay-management \
   --topic-name flight-operations \
-  --namespace-name sb-transavia-workshop-<your-initials> \
-  --resource-group rg-servicebus-workshop
+  --namespace-name $NAMESPACE \
+  --resource-group $RG
 
 # Gate management - wants gate changes at AMS only
 az servicebus topic subscription create \
   --name gate-management-ams \
   --topic-name flight-operations \
-  --namespace-name sb-transavia-workshop-<your-initials> \
-  --resource-group rg-servicebus-workshop
+  --namespace-name $NAMESPACE \
+  --resource-group $RG
 
 # Crew system - wants all events (no filter)
 az servicebus topic subscription create \
   --name crew-system \
   --topic-name flight-operations \
-  --namespace-name sb-transavia-workshop-<your-initials> \
-  --resource-group rg-servicebus-workshop
+  --namespace-name $NAMESPACE \
+  --resource-group $RG
 ```
 
 ### Step 3 — Remove the Default "Accept All" Rule
@@ -74,16 +83,16 @@ az servicebus topic subscription rule delete \
   --name '$Default' \
   --subscription-name delay-management \
   --topic-name flight-operations \
-  --namespace-name sb-transavia-workshop-<your-initials> \
-  --resource-group rg-servicebus-workshop
+  --namespace-name $NAMESPACE \
+  --resource-group $RG
 
 # Remove default rule from gate-management-ams
 az servicebus topic subscription rule delete \
   --name '$Default' \
   --subscription-name gate-management-ams \
   --topic-name flight-operations \
-  --namespace-name sb-transavia-workshop-<your-initials> \
-  --resource-group rg-servicebus-workshop
+  --namespace-name $NAMESPACE \
+  --resource-group $RG
 ```
 
 > **Leave** the `$Default` rule on `crew-system` — it should receive all messages.
@@ -95,8 +104,8 @@ az servicebus topic subscription rule create \
   --name delay-and-cancellation-filter \
   --subscription-name delay-management \
   --topic-name flight-operations \
-  --namespace-name sb-transavia-workshop-<your-initials> \
-  --resource-group rg-servicebus-workshop \
+  --namespace-name $NAMESPACE \
+  --resource-group $RG \
   --filter-sql-expression "eventType = 'Delay' OR eventType = 'Cancellation'"
 ```
 
@@ -107,8 +116,8 @@ az servicebus topic subscription rule create \
   --name gate-change-ams-filter \
   --subscription-name gate-management-ams \
   --topic-name flight-operations \
-  --namespace-name sb-transavia-workshop-<your-initials> \
-  --resource-group rg-servicebus-workshop \
+  --namespace-name $NAMESPACE \
+  --resource-group $RG \
   --filter-sql-expression "eventType = 'GateChange' AND airport = 'AMS'"
 ```
 
@@ -186,22 +195,22 @@ Check the message count for each subscription:
 az servicebus topic subscription show \
   --name delay-management \
   --topic-name flight-operations \
-  --namespace-name sb-transavia-workshop-<your-initials> \
-  --resource-group rg-servicebus-workshop \
+  --namespace-name $NAMESPACE \
+  --resource-group $RG \
   --query "countDetails.activeMessageCount"
 
 az servicebus topic subscription show \
   --name gate-management-ams \
   --topic-name flight-operations \
-  --namespace-name sb-transavia-workshop-<your-initials> \
-  --resource-group rg-servicebus-workshop \
+  --namespace-name $NAMESPACE \
+  --resource-group $RG \
   --query "countDetails.activeMessageCount"
 
 az servicebus topic subscription show \
   --name crew-system \
   --topic-name flight-operations \
-  --namespace-name sb-transavia-workshop-<your-initials> \
-  --resource-group rg-servicebus-workshop \
+  --namespace-name $NAMESPACE \
+  --resource-group $RG \
   --query "countDetails.activeMessageCount"
 ```
 

@@ -24,13 +24,22 @@ Transavia's automated flight plan system receives flight plans from dispatch. If
 
 ## Exercise Steps
 
+### Step 0 — Set Environment Variables
+
+If you haven't already, or if you're starting a new terminal session, set the variables from Lab 01:
+
+```bash
+NAMESPACE="sb-transavia-workshop-<your-initials>"
+RG="rg-servicebus-workshop"
+```
+
 ### Step 1 — Create a Queue with Dead-Lettering Options
 
 ```bash
 az servicebus queue create \
   --name flight-plan-validation \
-  --namespace-name sb-transavia-workshop-<your-initials> \
-  --resource-group rg-servicebus-workshop \
+  --namespace-name $NAMESPACE \
+  --resource-group $RG \
   --max-delivery-count 3 \
   --enable-dead-lettering-on-message-expiration true \
   --default-message-time-to-live PT5M \
@@ -67,8 +76,8 @@ Using Service Bus Explorer, send to `flight-plan-validation`:
 ```bash
 az servicebus queue show \
   --name flight-plan-validation \
-  --namespace-name sb-transavia-workshop-<your-initials> \
-  --resource-group rg-servicebus-workshop \
+  --namespace-name $NAMESPACE \
+  --resource-group $RG \
   --query "{active: countDetails.activeMessageCount, deadLetter: countDetails.deadLetterMessageCount}"
 ```
 
@@ -126,8 +135,8 @@ Messages in the DLQ can be manually inspected and resubmitted:
 ```bash
 # Check DLQ count for all queues in the namespace
 az servicebus queue list \
-  --namespace-name sb-transavia-workshop-<your-initials> \
-  --resource-group rg-servicebus-workshop \
+  --namespace-name $NAMESPACE \
+  --resource-group $RG \
   --query "[].{name: name, active: countDetails.activeMessageCount, deadLetter: countDetails.deadLetterMessageCount}" \
   --output table
 ```

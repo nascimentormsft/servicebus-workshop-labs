@@ -25,12 +25,21 @@ A major storm system hits Amsterdam, causing 50+ flight cancellations and delays
 
 ## Exercise Steps
 
+### Step 0 — Set Environment Variables
+
+If you haven't already, or if you're starting a new terminal session, set the variables from Lab 01:
+
+```bash
+NAMESPACE="sb-transavia-workshop-<your-initials>"
+RG="rg-servicebus-workshop"
+```
+
 ### Step 1 — Check Your Current Namespace SKU
 
 ```bash
 az servicebus namespace show \
-  --name sb-transavia-workshop-<your-initials> \
-  --resource-group rg-servicebus-workshop \
+  --name $NAMESPACE \
+  --resource-group $RG \
   --query "{sku: sku.name, tier: sku.tier, capacity: sku.capacity}"
 ```
 
@@ -63,9 +72,6 @@ Service Bus throttles when:
 If you have Azure Cloud Shell and want to see throttling in action:
 
 ```bash
-NAMESPACE="sb-transavia-workshop-<your-initials>"
-RG="rg-servicebus-workshop"
-
 # Get connection string
 CONN=$(az servicebus namespace authorization-rule keys list \
   --namespace-name $NAMESPACE \
@@ -111,14 +117,14 @@ If you have a Premium namespace (or viewing documentation):
 ```bash
 # View current capacity (Premium only)
 az servicebus namespace show \
-  --name sb-transavia-workshop-<your-initials> \
-  --resource-group rg-servicebus-workshop \
+  --name $NAMESPACE \
+  --resource-group $RG \
   --query "sku.capacity"
 
 # Scale up Premium namespace (Premium only)
 # az servicebus namespace update \
 #   --name sb-transavia-premium \
-#   --resource-group rg-servicebus-workshop \
+#   --resource-group $RG \
 #   --capacity 4
 ```
 
@@ -156,8 +162,8 @@ Pattern 3: Priority Queues
 # Or via CLI:
 az monitor metrics alert create \
   --name "servicebus-throttling-alert" \
-  --resource-group rg-servicebus-workshop \
-  --scopes "/subscriptions/<sub-id>/resourceGroups/rg-servicebus-workshop/providers/Microsoft.ServiceBus/namespaces/sb-transavia-workshop-<your-initials>" \
+  --resource-group $RG \
+  --scopes "/subscriptions/<sub-id>/resourceGroups/$RG/providers/Microsoft.ServiceBus/namespaces/$NAMESPACE" \
   --condition "total ThrottledRequests > 0" \
   --window-size 5m \
   --evaluation-frequency 1m \

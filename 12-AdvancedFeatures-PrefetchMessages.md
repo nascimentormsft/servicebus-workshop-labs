@@ -23,13 +23,22 @@ Transavia's baggage handling system at Schiphol processes barcode scan events fr
 
 ## Exercise Steps
 
+### Step 0 — Set Environment Variables
+
+If you haven't already, or if you're starting a new terminal session, set the variables from Lab 01:
+
+```bash
+NAMESPACE="sb-transavia-workshop-<your-initials>"
+RG="rg-servicebus-workshop"
+```
+
 ### Step 1 — Create a Queue for Baggage Scans
 
 ```bash
 az servicebus queue create \
   --name baggage-scans \
-  --namespace-name sb-transavia-workshop-<your-initials> \
-  --resource-group rg-servicebus-workshop \
+  --namespace-name $NAMESPACE \
+  --resource-group $RG \
   --lock-duration PT1M \
   --default-message-time-to-live P1D
 ```
@@ -148,8 +157,8 @@ In production, monitor these metrics to tune prefetch:
 # Check message counts and processing metrics
 az servicebus queue show \
   --name baggage-scans \
-  --namespace-name sb-transavia-workshop-<your-initials> \
-  --resource-group rg-servicebus-workshop \
+  --namespace-name $NAMESPACE \
+  --resource-group $RG \
   --query "{active: countDetails.activeMessageCount, deadLetter: countDetails.deadLetterMessageCount, size: sizeInBytes}"
 ```
 

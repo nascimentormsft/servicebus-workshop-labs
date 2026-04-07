@@ -25,6 +25,15 @@ Aviation systems are high-value targets for cyber attacks. EASA (European Union 
 
 ## Exercise Steps
 
+### Step 0 — Set Environment Variables
+
+If you haven't already, or if you're starting a new terminal session, set the variables from Lab 01:
+
+```bash
+NAMESPACE="sb-transavia-workshop-<your-initials>"
+RG="rg-servicebus-workshop"
+```
+
 ### Step 1 — View Security Recommendations for Service Bus
 
 1. In the Azure Portal, navigate to **Microsoft Defender for Cloud**
@@ -45,8 +54,8 @@ Common recommendations you may see:
 
 ```bash
 az servicebus namespace show \
-  --name sb-transavia-workshop-<your-initials> \
-  --resource-group rg-servicebus-workshop \
+  --name $NAMESPACE \
+  --resource-group $RG \
   --query "{name: name, sku: sku.name, publicNetworkAccess: publicNetworkAccess, minimumTlsVersion: minimumTlsVersion, disableLocalAuth: disableLocalAuth}"
 ```
 
@@ -65,8 +74,8 @@ Ensure the namespace requires TLS 1.2 (minimum for aviation security compliance)
 
 ```bash
 az servicebus namespace update \
-  --name sb-transavia-workshop-<your-initials> \
-  --resource-group rg-servicebus-workshop \
+  --name $NAMESPACE \
+  --resource-group $RG \
   --minimum-tls-version 1.2
 ```
 
@@ -77,8 +86,8 @@ For higher security, disable SAS key authentication and force Microsoft Entra ID
 ```bash
 # Check current state
 az servicebus namespace show \
-  --name sb-transavia-workshop-<your-initials> \
-  --resource-group rg-servicebus-workshop \
+  --name $NAMESPACE \
+  --resource-group $RG \
   --query "disableLocalAuth"
 
 # NOTE: Only do this if all consumers use Azure AD. 
@@ -100,7 +109,7 @@ az servicebus namespace show \
 ```bash
 # List policy assignments related to Service Bus
 az policy assignment list \
-  --resource-group rg-servicebus-workshop \
+  --resource-group $RG \
   --query "[?contains(displayName, 'Service Bus')].{name: displayName, enforcement: enforcementMode}" \
   --output table
 ```
