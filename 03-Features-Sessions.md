@@ -135,13 +135,7 @@ Repeat the send process but with **Session ID**: `PAX-AK-HV5102`
 }
 ```
 
-### Step 5 — Peek and Observe Session Ordering
-
-1. In Service Bus Explorer, switch to **Peek** mode
-2. Peek messages — note that messages are grouped by Session ID
-3. Within each session, messages maintain their send order (step 1, 2, 3, 4)
-
-### Step 6 — Receive Messages by Session
+### Step 5 — Receive Messages by Session
 
 1. Switch to **Receive** mode
 2. Enter **Session ID**: `PAX-JDV-HV6321`
