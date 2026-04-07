@@ -209,5 +209,13 @@ AzureDiagnostics
 ## Review Questions
 
 1. What is the difference between Azure Monitor Metrics and Diagnostic Logs?
+
+   > **Answer:** **Metrics** are lightweight, near-real-time numeric values (e.g., message count, request count) sampled at regular intervals. They're stored for 93 days and are ideal for dashboards, alerts, and quick health checks. **Diagnostic Logs** are detailed, event-level records (e.g., "User X sent a message to queue Y at time Z with result Success"). They capture the full audit trail and are sent to Log Analytics, Storage, or Event Hubs. Use metrics for monitoring; use logs for investigation and compliance.
+
 2. How long are metrics retained by default? How about diagnostic logs?
+
+   > **Answer:** **Metrics** are retained for **93 days** automatically at no extra cost. **Diagnostic logs** retention depends on the destination: Log Analytics workspace retention is configurable (default 30 days, max 730 days); Azure Storage retains them indefinitely until you delete them; Event Hubs streams them for real-time processing. For aviation compliance, configure Log Analytics retention to at least 90 days and archive to Storage for long-term (years).
+
 3. Why are CPU and Memory metrics only available on Premium tier?
+
+   > **Answer:** Standard tier runs on **shared infrastructure** — your namespace doesn't have dedicated CPU or memory allocations, so there's nothing meaningful to measure per-namespace. Premium tier provides **dedicated Messaging Units** with their own compute and memory resources. CPU and Memory metrics on Premium reflect your dedicated resource utilization and are essential for capacity planning: if CPU consistently exceeds 70%, you should scale up MUs before performance degrades.

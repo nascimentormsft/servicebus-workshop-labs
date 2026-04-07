@@ -149,5 +149,13 @@ az policy assignment list \
 ## Review Questions
 
 1. Why should aviation systems use Private Endpoints instead of public access with IP filtering?
+
+   > **Answer:** Private Endpoints route traffic through Azure's backbone network, never traversing the public internet. IP filtering still exposes the endpoint publicly — it just restricts who can connect. Risks with IP filtering: IP spoofing, corporate IP ranges changing, VPN exit IPs being shared, and the endpoint being discoverable via DNS scanning. For aviation systems handling PII (passenger data), payment info, and operational safety data, Private Endpoints provide a true network-level isolation that meets EASA and GDPR requirements.
+
 2. What is the risk of leaving SAS key authentication enabled?
+
+   > **Answer:** SAS keys are **static shared secrets** that, if leaked, grant full access until manually rotated. Risks: keys hardcoded in source code, committed to git, stored in plain text config files, or shared via email/chat. Unlike Azure AD tokens, SAS keys have **no identity** attached — you cannot audit *who* used the key, only that it was used. There's also no conditional access, MFA, or risk-based policies. A single leaked `RootManageSharedAccessKey` gives full control over the entire namespace.
+
 3. How does disabling public network access affect Service Bus Explorer in the Portal?
+
+   > **Answer:** Service Bus Explorer in the Azure Portal connects **from the portal's backend** over the public endpoint. If public network access is disabled, the portal's Service Bus Explorer **cannot connect** and will fail. To use the portal explorer with private endpoints, you would need to access the portal from a machine inside the VNet (e.g., via Azure Bastion to a jumpbox VM). Alternatively, use the standalone Service Bus Explorer tool from within the VNet.

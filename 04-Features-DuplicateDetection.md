@@ -154,5 +154,13 @@ This should return `2`, confirming the duplicate was discarded.
 ## Review Questions
 
 1. What would happen if the sender uses `Guid.NewGuid()` as the MessageId for retries?
+
+   > **Answer:** Duplicate detection would **fail completely**. Each retry would generate a new unique GUID, making every message appear as a new message to the broker. For duplicate detection to work, the sender must use a **deterministic, idempotent MessageId** derived from business data (e.g., the transaction ID `PAY-2026-040701-HV6321-JDV`), so that retries produce the same MessageId.
+
 2. The duplicate detection window is set to 1 day. A network issue causes a retry after 25 hours. Will the duplicate be caught?
+
+   > **Answer:** **No.** The original MessageId has already been evicted from the detection history table after 24 hours. The retry message (sent at 25 hours) will be treated as a new, unique message and enqueued. To cover this scenario, you would need to increase the detection window — but longer windows consume more broker memory. The window should match your maximum expected retry interval.
+
 3. Does duplicate detection add latency to message processing? What is the trade-off?
+
+   > **Answer:** Yes, there is a **small overhead** — the broker must perform a hash-table lookup for every incoming message. However, this is typically sub-millisecond and negligible. The real trade-off is **memory usage**: the broker maintains a table of all MessageId hashes within the window. Longer windows and higher message volumes mean more memory. On Standard tier (shared infrastructure), this could indirectly contribute to throttling under extreme load.

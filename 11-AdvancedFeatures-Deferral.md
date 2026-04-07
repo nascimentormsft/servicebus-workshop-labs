@@ -153,5 +153,17 @@ Send a new message, defer it, and track it:
 ## Review Questions
 
 1. What happens to a deferred message if its TTL expires?
+
+   > **Answer:** The deferred message is **dead-lettered** (if dead-lettering on expiration is enabled) or **silently discarded**. Deferral does not pause the TTL clock — the message continues to age. If you defer a message with 5 minutes of TTL remaining and don't retrieve it within that time, it expires. This is important to account for in production: ensure the TTL is long enough to cover the expected deferral duration.
+
 2. How would you track sequence numbers of deferred messages in a production system?
+
+   > **Answer:** Store the sequence numbers in a durable external store such as:
+   > - **Azure Table Storage** or **Cosmos DB**: key = session/workflow ID, value = list of deferred sequence numbers
+   > - **Redis Cache**: for fast lookup and automatic expiry
+   > - **A database column** on the workflow/saga entity
+   > The key principle: sequence numbers must be persisted outside the consumer process, because if the consumer restarts, in-memory sequence numbers are lost and the deferred messages become unretrievable.
+
 3. Why is deferral preferable to abandon+retry for handling out-of-order messages?
+
+   > **Answer:** **Abandon** returns the message to the queue head and increments `DeliveryCount`. After repeated abandons, it hits `MaxDeliveryCount` and gets dead-lettered — even though the message itself is perfectly valid, just out of order. **Deferral** parks the message without incrementing `DeliveryCount`, keeping it available indefinitely for retrieval by sequence number. It's a deliberate "I'll come back for this" vs. abandon's "I failed, try again."

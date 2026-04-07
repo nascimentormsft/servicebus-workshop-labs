@@ -154,5 +154,13 @@ az servicebus topic subscription list \
 ## Review Questions
 
 1. If the booking system only needs one consumer, should you use a Queue or a Topic?
+
+   > **Answer:** Use a **Queue**. Queues are designed for point-to-point communication (one sender, one receiver). They are simpler, require Basic tier or above, and are more efficient when there's only one consumer. Use a Topic only when you need to fan out the same message to multiple independent subscribers.
+
 2. What happens to messages sent to a Topic with zero subscriptions?
+
+   > **Answer:** The messages are **silently discarded**. A Topic without subscriptions has no delivery targets, so messages are accepted by the broker but immediately dropped. This is a common pitfall — always create subscriptions before sending messages, or messages will be lost.
+
 3. Why might the `display-boards` subscription have a shorter TTL than `crew-management`?
+
+   > **Answer:** Display boards show real-time information — a gate change from 6 hours ago is no longer relevant and would confuse passengers if displayed. Crew management, however, may need to reference flight status changes for shift planning, rebooking, and reporting over several days. TTL should match how long the data is operationally useful to the consumer.

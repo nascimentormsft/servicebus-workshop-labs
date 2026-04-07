@@ -230,5 +230,13 @@ az servicebus topic subscription show \
 ## Review Questions
 
 1. What happens to a message that doesn't match any subscription's filter?
+
+   > **Answer:** The message is **silently discarded** — it is not delivered to any subscription and there is no error. The message is simply accepted by the topic and dropped because no subscription matched. If you want to catch unmatched messages, create a "catch-all" subscription with the default `$Default` rule (TrueFilter) or enable dead-lettering on filter evaluation exceptions.
+
 2. Why should you remove the `$Default` rule before adding custom filters?
+
+   > **Answer:** The `$Default` rule is a `TrueFilter` (matches everything). If you add a custom filter without removing it, the subscription receives **all messages** regardless of your filter — because filters are combined with OR logic. Any message matching the `$Default` rule passes through, making your custom filter ineffective.
+
 3. When would you choose a Correlation Filter over a SQL Filter?
+
+   > **Answer:** Choose a **Correlation Filter** when you only need exact-match comparisons on message properties (e.g., `eventType = 'Delay'`). Correlation Filters use hash-based matching, making them significantly faster and more efficient than SQL Filters. Choose a **SQL Filter** when you need complex expressions with operators like `AND`, `OR`, `LIKE`, `IN`, `>`, `<`, or string functions. In high-throughput aviation scenarios, prefer Correlation Filters wherever possible for lower latency.

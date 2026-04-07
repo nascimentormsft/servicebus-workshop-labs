@@ -197,5 +197,13 @@ az servicebus topic create \
 ## Review Questions
 
 1. A partitioned queue has duplicate detection enabled. A message with the same MessageId is sent to two different partitions. Will duplicate detection catch it?
+
+   > **Answer:** **No.** Duplicate detection in partitioned queues is **per partition**, not global. Each partition maintains its own independent hash table of MessageId values. If the same MessageId lands in different partitions (e.g., because no PartitionKey was set and round-robin assigned them differently), the duplicate is NOT detected. To ensure duplicate detection works correctly with partitioning, always set a consistent **PartitionKey** so that retries of the same message land in the same partition.
+
 2. Why is the maximum entity size larger for partitioned queues?
+
+   > **Answer:** A partitioned queue has 16 internal partitions, each with its own storage. The total entity size is the sum of all partitions. On Standard tier, each partition can hold up to 5 GB, so a partitioned queue can hold up to **16 × 5 GB = 80 GB** (vs. 5 GB for a non-partitioned queue). This is a direct benefit of distributing data across multiple internal stores.
+
 3. Can you convert a non-partitioned queue to partitioned without data loss?
+
+   > **Answer:** **No.** Partitioning is an **immutable property** set at entity creation time. You cannot toggle it after the queue exists. To "migrate", you would need to: (1) create a new partitioned queue, (2) drain all messages from the old queue and send them to the new one, (3) update all producers and consumers to point to the new queue, (4) delete the old queue. This requires planned downtime or a gradual migration strategy.

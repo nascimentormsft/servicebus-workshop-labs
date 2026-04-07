@@ -177,5 +177,13 @@ az servicebus queue show \
 ## Review Questions
 
 1. What happens to in-flight messages if the consumer process crashes in PeekLock mode?
+
+   > **Answer:** The messages remain safely in the queue. When the consumer crashes, it cannot Complete or Abandon the locked messages. After the **lock duration expires**, the locks are automatically released, and the messages become visible for redelivery. The `DeliveryCount` increments on next delivery. This is exactly why PeekLock is the recommended mode for mission-critical systems — no messages are lost on consumer failure.
+
 2. Why is ReceiveAndDelete risky for crew assignment processing?
+
+   > **Answer:** In ReceiveAndDelete mode, the message is **permanently deleted the instant it's delivered** to the consumer — before any processing occurs. If the consumer crashes after receiving but before completing the crew assignment logic (e.g., database update, notification), the assignment message is **lost forever**. There's no retry, no dead-letter, no recovery. For crew assignments, losing a message could mean a flight departs without required crew.
+
 3. A message has DeliveryCount = 10 but max-delivery-count is 5. What happened?
+
+   > **Answer:** This shouldn't happen under normal circumstances — the message should have been dead-lettered at count 5. However, `DeliveryCount` can exceed `MaxDeliveryCount` if the `MaxDeliveryCount` was **lowered after** the message was already in the queue with a higher count. Another scenario: the message was explicitly received from the dead-letter queue and resubmitted to the main queue, carrying its original DeliveryCount forward.

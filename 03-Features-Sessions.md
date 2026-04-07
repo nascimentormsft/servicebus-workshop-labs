@@ -164,5 +164,13 @@ Repeat the send process but with **Session ID**: `PAX-AK-HV5102`
 ## Review Questions
 
 1. What happens if you try to send a message without a Session ID to a session-enabled queue?
+
+   > **Answer:** The send operation **fails** with an `InvalidOperationException`. A session-enabled queue requires every message to have a `SessionId` property set. This is enforced by the broker at send time — there is no default or auto-generated session ID.
+
 2. Can two consumers process messages from the same session simultaneously?
+
+   > **Answer:** **No.** When a consumer accepts a session, it acquires an exclusive lock on that entire session. No other consumer can receive messages from the same session until the lock is released or expires. However, two consumers CAN process **different sessions** in parallel — this is the key benefit.
+
 3. Why are sessions a better fit than a single queue with ordering for check-in workflows handling hundreds of passengers concurrently?
+
+   > **Answer:** A single ordered queue would process passengers sequentially (one at a time), creating a bottleneck. Sessions allow **parallelism across passengers** while maintaining **order within each passenger's workflow**. With sessions, 100 consumers can each lock a different passenger's session and process them simultaneously, achieving high throughput without sacrificing per-passenger ordering.

@@ -221,5 +221,13 @@ az servicebus queue update \
 ## Review Questions
 
 1. If `disruption-triage` has both a consumer AND auto-forwarding enabled, what happens?
+
+   > **Answer:** The auto-forwarding takes precedence — messages are forwarded **before** any consumer can receive them. The consumer on `disruption-triage` will **never see any messages**. Auto-forwarding happens at the broker level when the message is enqueued, not at receive time. If you need both a consumer and forwarding, use a Topic with two subscriptions: one for the consumer and one with auto-forwarding.
+
 2. Can you create a circular auto-forwarding chain (A → B → A)? What would happen?
+
+   > **Answer:** Azure Service Bus **prevents circular forwarding** at configuration time. When you try to set up a chain that would create a cycle, the operation fails with an error. The broker validates the forwarding graph to ensure there are no loops. This protects against infinite message loops that would consume resources and fill up queues.
+
 3. How does auto-forwarding interact with message TTL?
+
+   > **Answer:** The message's TTL **continues to count down** as it passes through the forwarding chain. The TTL is set when the message is originally sent and is not reset by forwarding. If a message spends time in transit through multiple hops, it can expire and be dead-lettered at any point in the chain. The effective TTL at the destination is the original TTL minus the time spent in transit.

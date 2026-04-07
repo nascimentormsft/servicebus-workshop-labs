@@ -238,5 +238,13 @@ If you want to clean up all workshop resources:
 ## Review Questions
 
 1. What is the difference between metric-based and log-based alerts?
+
+   > **Answer:** **Metric-based alerts** evaluate numeric metrics at regular intervals (e.g., "active messages > 1000 for 15 minutes"). They're fast (1-minute evaluation possible), low-latency, and ideal for real-time operational alerts. **Log-based alerts** run KQL queries against Log Analytics data and can evaluate complex conditions across multiple data sources (e.g., "more than 10 failed send operations from IP range X in 5 minutes"). They have higher latency (5+ minutes) but offer richer filtering and correlation capabilities.
+
 2. Why would you use a 15-minute window for backlog alerts instead of 1 minute?
+
+   > **Answer:** Short windows cause **alert fatigue** from false positives. A momentary spike of 1,001 messages for 30 seconds (e.g., during a batch send) would trigger a 1-minute alert even though the consumer clears it immediately. A 15-minute window ensures the backlog is **sustained**, indicating a genuine consumer problem rather than a transient burst. The trade-off: longer windows mean slower detection. For critical systems, use tiered alerts: a Warning at 15 minutes and a Critical at 5 minutes with a higher threshold.
+
 3. How would you set up automated remediation when throttling is detected? (Hint: Azure Function + scale MUs)
+
+   > **Answer:** (1) Create an alert rule on the `ThrottledRequests` metric. (2) Configure the action group to trigger an **Azure Function** via webhook. (3) The Function uses the Azure SDK/REST API to call `az servicebus namespace update --capacity <higher_MU>` to scale up the Premium namespace's Messaging Units. (4) Set a separate scheduled Function to scale back down after the spike (e.g., check if throttling stopped for 30 minutes, then reduce MUs). Important: include safeguards like a maximum MU cap and Slack/Teams notifications so the team is aware of automated scaling actions.

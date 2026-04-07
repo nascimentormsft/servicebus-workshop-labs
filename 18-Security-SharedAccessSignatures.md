@@ -210,5 +210,13 @@ az servicebus queue authorization-rule delete \
 ## Review Questions
 
 1. An external ground handler needs to send AND receive from a queue. Should you give them a Manage SAS policy?
+
+   > **Answer:** **No.** The `Manage` right includes the ability to create, delete, and modify entities (queues, topics, subscriptions) — far more than the handler needs. Instead, create a SAS policy with **both Send and Listen rights** (but not Manage). This gives the ground handler exactly the access they need without risking them accidentally or maliciously deleting the queue or changing its configuration.
+
 2. What is the maximum number of SAS policies you can have on a single queue?
+
+   > **Answer:** **12.** This applies per entity (queue, topic, or subscription). The namespace level has a separate limit. If you have more than 12 external partners needing individual access, consider: (a) sharing policies between partners with similar access needs, (b) using a proxy/API gateway that authenticates partners and uses a single SAS policy to forward messages, or (c) migrating partners to Azure AD B2B with Managed Identity.
+
 3. Why is key rotation important, and how do dual keys (primary/secondary) help?
+
+   > **Answer:** Key rotation limits the window of exposure if a key is leaked. Dual keys enable **zero-downtime rotation**: (1) share the secondary key with partners, (2) partners update their config to use the secondary key, (3) regenerate the primary key (now invalid, but nobody uses it), (4) the secondary key continues working uninterrupted. Without dual keys, rotation would require simultaneous coordinated updates between key regeneration and all consumer config updates — practically impossible with external partners.

@@ -189,5 +189,13 @@ az monitor metrics alert create \
 ## Review Questions
 
 1. Why is Standard tier throttling unpredictable compared to Premium?
+
+   > **Answer:** Standard tier uses **shared infrastructure** — your namespace shares compute, memory, and network resources with other tenants (noisy neighbor problem). During peak times, if other tenants on the same cluster are heavy consumers, your namespace gets fewer resources and throttling thresholds are reached sooner. Premium tier provides **dedicated resources** (Messaging Units) that are exclusively yours, making performance predictable and throttling behavior consistent.
+
 2. During a storm causing 50 flight cancellations, which messages should be prioritized? How would you design this?
+
+   > **Answer:** Priority order: (1) **Safety-critical** messages (crew notifications, ATC communications), (2) **Passenger communications** (cancellation notices, rebooking options), (3) **Operational** messages (baggage rerouting, ground handling), (4) **Informational** (analytics, reporting). Design: use **separate namespaces or separate Premium MUs** for safety-critical vs. operational traffic. Within a namespace, use separate queues per priority level with dedicated consumer pools. Never mix safety-critical and informational traffic on the same Standard tier namespace.
+
 3. What is the cost trade-off of running 4 MUs continuously vs. 1 MU with manual scaling during disruptions?
+
+   > **Answer:** 4 MUs continuously costs ~4x more monthly but guarantees capacity during sudden spikes (weather events hit without warning). 1 MU with manual scaling saves ~75% cost but introduces risk: scaling Premium MUs takes **minutes**, during which messages may be throttled or lost. For aviation, the **revenue loss and passenger impact of a 15-minute outage during a major disruption far exceeds the cost savings** from running fewer MUs. A middle ground: run 2 MUs normally with automated alerts that trigger scaling to 4 MUs when metrics cross thresholds.

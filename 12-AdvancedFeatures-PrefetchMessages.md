@@ -188,5 +188,13 @@ az servicebus queue show \
 ## Review Questions
 
 1. If PrefetchCount = 50 and LockDuration = 30s, what is the maximum safe per-message processing time?
+
+   > **Answer:** Approximately **0.6 seconds** (600ms) per message. Calculation: `LockDuration / PrefetchCount = 30s / 50 = 0.6s`. The last prefetched message (message #50) must be processed before its lock expires. Since all 50 locks start simultaneously at prefetch time, you need to process all 50 within 30 seconds. In practice, apply a safety factor (e.g., 80%): `30s / 50 * 0.8 = 0.48s` per message.
+
 2. Should you use prefetch with ReceiveAndDelete mode? What are the risks?
+
+   > **Answer:** You **can**, but it's risky. In ReceiveAndDelete + prefetch, all prefetched messages are **immediately deleted from the broker** and buffered on the client. If the consumer crashes, all buffered messages are **permanently lost** — there's no lock to expire, no retry, and no dead-letter. For non-critical, high-volume data (e.g., telemetry), this may be acceptable for maximum throughput. For booking or crew messages, never combine prefetch with ReceiveAndDelete.
+
 3. Why might you use a lower PrefetchCount for session-enabled queues?
+
+   > **Answer:** In session-enabled queues, a consumer processes one session at a time sequentially. Prefetching many messages from a single session means all those locks start simultaneously, but they're processed one-by-one. A PrefetchCount of 50 with slow per-message processing could easily exceed the lock duration. Additionally, in session mode, you can't parallelize messages within the same session, so the benefit of a large prefetch buffer is reduced.

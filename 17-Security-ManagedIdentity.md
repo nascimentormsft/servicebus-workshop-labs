@@ -227,5 +227,13 @@ client = ServiceBusClient(
 ## Review Questions
 
 1. An application needs to both send and receive from the same queue. Which role(s) should you assign?
+
+   > **Answer:** Assign **both** `Azure Service Bus Data Sender` and `Azure Service Bus Data Receiver` roles to the same managed identity, scoped to that specific queue. Do NOT use `Azure Service Bus Data Owner` unless the application also needs to manage (create/delete) entities. Always follow least-privilege: two narrow roles are better than one broad role.
+
 2. What happens if you disable local auth and an application still uses a connection string?
+
+   > **Answer:** All connection-string-based (SAS key) authentication attempts are **rejected immediately** with an `Unauthorized` error (HTTP 401). The existing SAS keys still exist in the namespace but are non-functional. The application must be updated to use `DefaultAzureCredential` or another Azure AD token-based authentication method before local auth is disabled. This is a breaking change — always verify all consumers have migrated first.
+
 3. Why is queue-level scoping more secure than namespace-level?
+
+   > **Answer:** Namespace-level scoping grants the role across **all** queues, topics, and subscriptions in the namespace. If the booking processor's identity is compromised, an attacker could read messages from every queue (crew assignments, payment transactions, etc.). Queue-level scoping limits the blast radius: a compromised identity can only access the specific queue(s) it was granted. This is the **principle of least privilege** — each application should only access exactly what it needs.

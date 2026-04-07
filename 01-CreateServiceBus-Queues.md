@@ -168,5 +168,13 @@ Review the JSON output and identify:
 ## Review Questions
 
 1. What happens if you try to send a message larger than 256 KB on a Standard tier namespace?
+
+   > **Answer:** The send operation is rejected with a `MessageSizeExceededException`. Standard and Basic tiers have a 256 KB maximum message size. To send larger messages, you need to upgrade to Premium tier (up to 100 MB) or implement a claim-check pattern where the payload is stored in Azure Blob Storage and only a reference is sent via Service Bus.
+
 2. Why would you enable dead-lettering on message expiration for the baggage-processing queue?
+
+   > **Answer:** Expired baggage messages may indicate a processing failure or system outage. By dead-lettering them instead of silently discarding, the operations team can investigate why messages weren't processed in time, identify the root cause, and potentially resubmit them. This is critical in aviation where lost baggage information directly impacts passengers.
+
 3. What is the difference between **Peek** and **Receive** in Service Bus Explorer?
+
+   > **Answer:** **Peek** reads the message without locking or removing it — it's non-destructive and safe for troubleshooting in production. **Receive** either locks the message (PeekLock mode) or permanently removes it (ReceiveAndDelete mode). Peek does not affect the message count or state; Receive does.

@@ -205,5 +205,13 @@ Effective TTL = min(Per-Message TTL, Subscription TTL, Topic TTL)
 ## Review Questions
 
 1. If a topic has TTL of 2 days and a subscription has TTL of 5 days, what is the effective TTL for messages in that subscription?
+
+   > **Answer:** **2 days.** The topic TTL acts as a ceiling for all its subscriptions. The effective TTL is `min(messageTTL, subscriptionTTL, topicTTL)`. A subscription cannot retain messages longer than the topic allows, even if its own TTL is configured to be longer.
+
 2. Does changing the queue's default TTL affect messages already in the queue?
+
+   > **Answer:** **No.** Existing messages retain the TTL that was applied when they were enqueued (either the per-message TTL or the queue default at enqueue time). The new default TTL only applies to **new messages** sent after the change. This means during a transition, you may have messages with mixed TTL values in the same queue.
+
 3. Why would you disable dead-lettering on expiration for telemetry data?
+
+   > **Answer:** Telemetry data (fuel levels, altitude, speed) is **ephemeral and high-volume**. Once expired, it has no operational value — the current reading supersedes any past reading. Dead-lettering expired telemetry would flood the DLQ with millions of stale readings, wasting storage and making it harder to find genuinely important dead-lettered messages from other queues. Simply discarding expired telemetry is the correct approach.

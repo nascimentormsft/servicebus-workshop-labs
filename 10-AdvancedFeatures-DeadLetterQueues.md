@@ -167,5 +167,17 @@ az servicebus queue list \
 ## Review Questions
 
 1. What is the DLQ path for a queue named `payment-transactions`? (Hint: `<queuename>/$deadletterqueue`)
+
+   > **Answer:** `payment-transactions/$deadletterqueue`. Every queue and subscription automatically has a DLQ sub-queue at this path. For topic subscriptions, the path is `<topicname>/subscriptions/<subscriptionname>/$deadletterqueue`.
+
 2. Why don't DLQ messages have a TTL?
+
+   > **Answer:** DLQ messages are designed for **manual investigation and remediation**. Applying a TTL to dead-lettered messages would risk silently losing problematic messages before an engineer has a chance to investigate. In aviation, a dead-lettered flight plan or payment message could represent a safety or financial issue that must be reviewed. The trade-off is that DLQ messages accumulate indefinitely — you need monitoring and a cleanup process.
+
 3. Should you auto-resubmit all DLQ messages? What risks are involved?
+
+   > **Answer:** **No, not blindly.** Risks include:
+   > - **Poison messages** will immediately fail again and return to the DLQ, creating an infinite loop.
+   > - **Expired business context** — a 3-day-old booking confirmation may no longer be valid.
+   > - **Duplicate processing** — a manual workaround may have already handled the case.
+   > Best practice: inspect each DLQ message, fix the root cause, validate the data is still relevant, and only then resubmit. For automated resubmission, implement a "fix and forward" processor that applies corrections before resending.

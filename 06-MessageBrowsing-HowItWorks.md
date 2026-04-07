@@ -195,5 +195,17 @@ az servicebus queue show \
 ## Review Questions
 
 1. A queue shows 500 active messages but the consumer says it's receiving nothing. What would you check first using Peek?
+
+   > **Answer:** Peek the messages and inspect:
+   > - **DeliveryCount**: If it's high on all messages, the consumer IS receiving them but failing to process (likely crashing or abandoning). The messages keep returning to the queue.
+   > - **Message body/properties**: Are the messages malformed or incompatible with the consumer's current code version?
+   > - **Session ID**: If the queue is session-enabled, the consumer must specify a session to receive. If the consumer isn't session-aware, it gets nothing.
+   > - Also check the consumer's connection string, queue name, and whether it's connecting to the right namespace.
+
 2. What is the difference between `Peek` and `Receive` in PeekLock mode?
+
+   > **Answer:** **Peek** reads the message without any lock or state change — the message remains fully available to consumers. **Receive in PeekLock mode** acquires an exclusive lock on the message, making it temporarily invisible to other receivers. The receiver must then Complete, Abandon, Dead-letter, or Defer the message before the lock expires. If the lock expires without settlement, the message becomes visible again.
+
 3. Can Peek interfere with a running consumer or cause message loss?
+
+   > **Answer:** **No.** Peek is completely non-destructive and does not acquire locks. It has no effect on message state, delivery count, or visibility. You can safely Peek a production queue while consumers are actively processing without any impact. This makes it the ideal first tool for troubleshooting.

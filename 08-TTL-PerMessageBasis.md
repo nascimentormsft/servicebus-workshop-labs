@@ -146,5 +146,13 @@ Peek periodically and watch them expire one by one.
 ## Review Questions
 
 1. A gate notification has a 2-hour TTL but the queue default is 30 minutes. What is the effective TTL?
+
+   > **Answer:** **30 minutes.** The queue's default TTL acts as a ceiling. The effective TTL is always `min(messageTTL, queueTTL)`. Even though the sender requested 2 hours, the queue's 30-minute limit wins. To allow 2-hour per-message TTLs, the queue default must be set to at least 2 hours.
+
 2. Why is dead-lettering on expiration useful for gate notifications?
+
+   > **Answer:** Expired gate notifications indicate that passengers may **not** have been informed of a gate change. By capturing these in the DLQ, the operations team can audit which notifications were missed, identify system outages (e.g., the notification service was down), and take corrective action (e.g., manual PA announcements). Without dead-lettering, expired messages are silently discarded and the failure is invisible.
+
 3. Should boarding pass messages have a short or long TTL? Why?
+
+   > **Answer:** **Short TTL** (a few hours, aligned with departure time). A boarding pass is only valid for a specific flight on a specific date. Once the flight has departed, the boarding pass message has no value and should expire. A reasonable TTL would be the time between generation and scheduled departure plus a small buffer (e.g., 4–6 hours). Long TTLs would waste storage and could cause confusion if stale passes were processed.
