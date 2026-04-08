@@ -111,16 +111,16 @@ az servicebus queue show \
 
 > **Peek** is a read-only operation. It does not acquire a lock, does not increment `DeliveryCount`, and does not remove the message. This is what Service Bus Explorer uses for browsing.
 
-### Step 5 — Receive a Message (Destructive)
+### Step 5 — Receive in PeekLock Mode and Complete
 
 1. Switch to **Receive** mode in Service Bus Explorer
 2. Click **Receive messages**
-3. In Settings, select **ReceiveAndDelete** and click **Receive**
-4. You get Message 1 and it is **permanently removed** from the queue
+3. In Settings, select **PeekLock** and click **Receive**
+4. Message 1 appears in the list — it is now **locked**
+5. **Select the message** (click on it) — the ribbon reveals settlement options: **Complete**, **Abandon**, **Dead-letter**
+6. Click **Complete** — the message is permanently removed from the queue
 
-> The Portal's Service Bus Explorer uses **ReceiveAndDelete** mode. The message is deleted the instant it's delivered to you — there is no lock, no Complete, no Abandon.
-
-3. Verify the count decreased:
+Verify the count decreased:
 
 ```bash
 az servicebus queue show \
@@ -130,37 +130,48 @@ az servicebus queue show \
   --query "countDetails.activeMessageCount"
 ```
 
-### Step 6 — Understand the Difference: Portal vs SDK
+### Step 6 — Receive in PeekLock Mode and Abandon
 
-The Portal's Service Bus Explorer supports two operations:
+1. Click **Receive messages** again (still in PeekLock mode)
+2. Message 2 appears — select it
+3. Click **Abandon** — the lock is released and the message returns to the queue
+4. **Peek** the queue — Message 2 is still there, and its **DeliveryCount** has incremented
 
-| Portal Operation | What Happens | Equivalent SDK Mode |
-|---|---|---|
-| **Peek** | Read-only, message stays in queue | `PeekMessageAsync()` |
-| **Receive** | Message is immediately deleted | `ReceiveAndDelete` mode |
+> **Abandon** simulates a transient failure: the consumer couldn't process the message, so it releases it back for another attempt.
 
-The **PeekLock** settlement workflow (Complete, Abandon, Dead-letter, Defer) is only available via **SDK or code**. Here's how it works in production:
+### Step 7 — Observe Lock Expiry
 
-```
-1. Consumer calls Receive() in PeekLock mode
-2. Message is LOCKED for the configured lock duration (30s in our case)
-3. No other consumer can see the locked message
-4. Consumer processes the message, then:
-   → Complete()     — message is permanently removed (success)
-   → Abandon()      — lock released, message returns to queue, DeliveryCount++
-   → Dead-letter()  — message moved to DLQ with a reason (poison message)
-   → Defer()        — message can only be retrieved by sequence number later
-5. If the consumer crashes, the lock expires and the message reappears automatically
-```
+1. Click **Receive messages** in PeekLock mode again
+2. Message 2 appears — **do not select it, do not click Complete or Abandon**
+3. Wait for the lock duration (30 seconds) — the status changes to **Lock expired**
+4. **Peek** the queue — Message 2 is still there, available for redelivery
 
-> **This is the key insight for aviation systems:** PeekLock ensures that if a crew scheduling service crashes mid-processing, the assignment message is NOT lost — it reappears after the lock expires and is picked up by another instance.
+> **This is the key insight for aviation systems:** If a crew scheduling service crashes mid-processing (equivalent to letting the lock expire), the assignment message is NOT lost — it reappears after the lock expires and is picked up by another instance.
 
-### Step 7 — Experiment: Peek vs Receive Side by Side
+### Step 8 — Receive with ReceiveAndDelete
 
-1. **Peek** the remaining messages — confirm you see Messages 2 and 3
-2. **Receive** one message — Message 2 is gone
-3. **Peek** again — only Message 3 remains
-4. This reinforces: Peek = browse safely, Receive (in Portal) = consume and delete
+1. Click **Receive messages**
+2. In Settings, switch to **ReceiveAndDelete** and click **Receive**
+3. Message 2 is received and **immediately deleted** — no settlement options appear
+4. The message is gone permanently, regardless of whether processing succeeded
+
+> **ReceiveAndDelete** is faster but risky — if the consumer crashes before processing, the message is lost forever. Use only for non-critical or idempotent workloads.
+
+### Step 9 — Experiment: Peek vs PeekLock vs ReceiveAndDelete
+
+1. **Peek** the remaining message (Message 3) — confirm it's still in the queue
+2. **Receive** in **PeekLock** — select the message, then click **Complete** to remove it
+3. **Peek** again — the queue is now empty
+
+Summary of what you observed:
+
+| Action | Message Removed? | Settlement Options? | DeliveryCount Changed? |
+|---|---|---|---|
+| **Peek** | No | None | No |
+| **Receive (PeekLock)** → Complete | Yes | Complete, Abandon, Dead-letter | Yes (on delivery) |
+| **Receive (PeekLock)** → Abandon | No (returns to queue) | Complete, Abandon, Dead-letter | Yes (+1) |
+| **Receive (PeekLock)** → Lock expired | No (returns to queue) | None (lock lost) | Check via Peek |
+| **Receive (ReceiveAndDelete)** | Yes (immediately) | None | N/A (message gone) |
 
 ---
 
