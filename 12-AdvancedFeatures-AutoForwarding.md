@@ -187,13 +187,13 @@ az servicebus queue show \
 
 ### Step 7 — Remove Auto-Forwarding
 
-```bash
-az servicebus queue update \
-  --name disruption-triage \
-  --namespace-name $NAMESPACE \
-  --resource-group $RG \
-  --forward-to ""
-```
+The Azure CLI does not support clearing the `--forward-to` property (empty strings are rejected). Use the Portal instead:
+
+1. Navigate to **Queues** → `disruption-triage`
+2. In the **Essentials** group, click **disruption-processing** in the **Forward messages to** property
+3. Clear the **Forward messages to queue/topic** check
+4. Click **OK**
+5. Send a test message to `disruption-triage` — it should now stay in the queue instead of being forwarded
 
 ---
 
