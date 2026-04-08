@@ -1,4 +1,4 @@
-# Lab 19 – Monitoring: Setting Up Alerts and Notifications
+# Lab 18 – Monitoring: Setting Up Alerts and Notifications
 
 ## Objective
 

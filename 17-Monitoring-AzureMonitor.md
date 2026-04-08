@@ -1,4 +1,4 @@
-# Lab 18 – Monitoring: Azure Monitor for Service Bus
+# Lab 17 – Monitoring: Azure Monitor for Service Bus
 
 ## Objective
 
