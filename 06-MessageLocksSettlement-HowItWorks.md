@@ -124,24 +124,7 @@ While Message 1 is locked:
 4. The **DeliveryCount** increments
 5. Receive again — Message 2 is immediately available
 
-### Step 8 — Trigger Dead-Lettering via Max Delivery Count
-
-1. Receive Message 2 (DeliveryCount should be 2 after the previous abandon)
-2. **Abandon** it again (DeliveryCount → 3)
-3. Receive it once more — since we set `max-delivery-count` to 3, the message is now **dead-lettered**
-4. Check the dead-letter queue:
-
-```bash
-az servicebus queue show \
-  --name crew-assignments \
-  --namespace-name $NAMESPACE \
-  --resource-group $RG \
-  --query "{active: countDetails.activeMessageCount, deadLetter: countDetails.deadLetterMessageCount}"
-```
-
-5. In Service Bus Explorer, switch to the **Dead letter** tab and peek — you should see Message 2 with `DeadLetterReason`
-
-### Step 9 — Experiment with ReceiveAndDelete
+### Step 8 — Experiment with ReceiveAndDelete
 
 1. Send a new test message to the queue
 2. Switch to **ReceiveAndDelete** mode in Service Bus Explorer
