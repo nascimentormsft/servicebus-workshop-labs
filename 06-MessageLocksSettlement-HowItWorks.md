@@ -117,8 +117,10 @@ az servicebus queue show \
 2. Click **Receive messages**
 3. In Settings, select **PeekLock** and click **Receive**
 4. Message 1 appears in the list — it is now **locked**
-5. **Select the message** (click on it) — the ribbon reveals settlement options: **Complete**, **Abandon**, **Dead-letter**
+5. **Select the message** (click on it) — the ribbon reveals settlement options: **Complete**, **Abandon**, **Dead-letter**, and **Defer**
 6. Click **Complete** — the message is permanently removed from the queue
+
+> **⚠ WARNING — Do NOT click Defer during this lab.** A deferred message is removed from the normal receive flow and can **only** be retrieved by its sequence number via SDK code. The Portal's Service Bus Explorer **cannot retrieve deferred messages**. Deferred messages still count toward `activeMessageCount`, so you'll see messages in the count but won't be able to receive them. If you accidentally defer a message, you'll need to use the SDK or delete and recreate the queue.
 
 Verify the count decreased:
 
@@ -171,7 +173,10 @@ Summary of what you observed:
 | **Receive (PeekLock)** → Complete | Yes | Complete, Abandon, Dead-letter | Yes (on delivery) |
 | **Receive (PeekLock)** → Abandon | No (returns to queue) | Complete, Abandon, Dead-letter | Yes (+1) |
 | **Receive (PeekLock)** → Lock expired | No (returns to queue) | None (lock lost) | Check via Peek |
+| **Receive (PeekLock)** → Defer | No (stays as active count) | N/A | N/A |
 | **Receive (ReceiveAndDelete)** | Yes (immediately) | None | N/A (message gone) |
+
+> **⚠ About Defer:** Deferred messages are a trap in the Portal. They count as "active" but cannot be received through normal means — only via SDK using the sequence number. If your active message count is higher than what you can receive, you likely have deferred messages. To clean up, delete and recreate the queue.
 
 ---
 
