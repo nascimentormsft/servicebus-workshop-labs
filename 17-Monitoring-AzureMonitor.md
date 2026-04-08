@@ -110,7 +110,8 @@ az monitor diagnostic-settings create \
 
 1. Navigate to your Service Bus namespace
 2. Go to **Monitoring** → **Diagnostic settings**
-3. You should see `sb-diagnostics` enabled
+3. Open **sb-transavia-workshop-<your-initials>**
+3. You should see `sb-diagnostics` with **law-servicebus-workshop**
 4. Click on it to review which log categories and metrics are being captured
 
 ### Step 7 — Query Logs with KQL (Kusto Query Language)
