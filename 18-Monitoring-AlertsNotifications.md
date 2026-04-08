@@ -71,7 +71,7 @@ az monitor metrics alert create \
   --name "alert-deadletter-detected" \
   --resource-group $RG \
   --scopes $SB_ID \
-  --condition "total DeadletteredMessages > 0" \
+  --condition "max DeadletteredMessages > 0" \
   --window-size 5m \
   --evaluation-frequency 1m \
   --severity 2 \
