@@ -116,6 +116,8 @@ az monitor diagnostic-settings create \
 
 ### Step 7 — Query Logs with KQL (Kusto Query Language)
 
+> **⚠ Important:** Diagnostic logs take **5 to 15 minutes** (sometimes up to 30 minutes) to appear in Log Analytics after enabling diagnostic settings. If your queries return no results, generate some activity first (send/receive messages on any queue), wait 10-15 minutes, then try again. You can run `search * | take 10` to check if any data has arrived yet.
+
 1. Navigate to your Log Analytics workspace
 2. Click **Logs**
 3. Run these queries:
