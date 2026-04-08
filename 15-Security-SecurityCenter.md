@@ -1,4 +1,4 @@
-# Lab 16 – Security: Microsoft Defender for Cloud (Security Center)
+# Lab 15 – Security: Microsoft Defender for Cloud (Security Center)
 
 ## Objective
 

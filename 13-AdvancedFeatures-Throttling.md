@@ -1,4 +1,4 @@
-# Lab 14 – Throttling
+# Lab 13 – Throttling
 
 ## Objective
 

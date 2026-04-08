@@ -1,4 +1,4 @@
-# Lab 17 – Security: Managed Identity
+# Lab 16 – Security: Managed Identity
 
 ## Objective
 

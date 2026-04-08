@@ -1,4 +1,4 @@
-# Lab 11 – Delaying Message Processing with Deferral
+# Lab 10 – Delaying Message Processing with Deferral
 
 ## Objective
 

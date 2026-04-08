@@ -1,4 +1,4 @@
-# Lab 13 – Auto-Forwarding
+# Lab 12 – Auto-Forwarding
 
 ## Objective
 

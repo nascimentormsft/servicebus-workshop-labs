@@ -1,4 +1,4 @@
-# Lab 18 – Security: Shared Access Signatures (SAS)
+# Lab 17 – Security: Shared Access Signatures (SAS)
 
 ## Objective
 

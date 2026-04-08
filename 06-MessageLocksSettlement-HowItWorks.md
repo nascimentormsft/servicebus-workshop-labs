@@ -1,4 +1,4 @@
-# Lab 07 – Message Locks and Settlement
+# Lab 06 – Message Locks and Settlement
 
 ## Objective
 

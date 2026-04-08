@@ -1,4 +1,4 @@
-# Lab 09 – Setting TTL: Queue and Topic Level
+# Lab 08 – Setting TTL: Queue and Topic Level
 
 ## Objective
 

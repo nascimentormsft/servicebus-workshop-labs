@@ -1,4 +1,4 @@
-# Lab 12 – Prefetch Messages
+# Lab 11 – Prefetch Messages
 
 ## Objective
 

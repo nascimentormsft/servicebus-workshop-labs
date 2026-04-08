@@ -1,4 +1,4 @@
-# Lab 15 – Partitioning
+# Lab 14 – Partitioning
 
 ## Objective
 

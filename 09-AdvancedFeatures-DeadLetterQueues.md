@@ -1,4 +1,4 @@
-# Lab 10 – Dead-Letter Queues
+# Lab 09 – Dead-Letter Queues
 
 ## Objective
 
@@ -157,7 +157,7 @@ az servicebus queue list \
 ## DLQ Best Practices
 
 1. **Monitor DLQ counts** — a growing DLQ signals consumer issues
-2. **Set alerts** on `DeadLetteredMessages` metric (covered in Lab 20)
+2. **Set alerts** on `DeadLetteredMessages` metric (covered in Lab 19)
 3. **Build DLQ processors** for automated resubmission of fixable issues
 4. **DLQ has no TTL** — messages stay forever unless explicitly removed
 5. **DLQ has a max size** — it shares the queue's max size quota

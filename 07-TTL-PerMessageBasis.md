@@ -1,4 +1,4 @@
-# Lab 08 – Setting TTL: Per-Message Basis
+# Lab 07 – Setting TTL: Per-Message Basis
 
 ## Objective
 
