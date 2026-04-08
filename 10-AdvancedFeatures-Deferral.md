@@ -98,13 +98,32 @@ Using Service Bus Explorer, send these messages **in this order** (intentionally
    - Click **Complete**
 5. Now you're ready for step 3 — but it's deferred
 
-### Step 4 — Retrieve the Deferred Message by Sequence Number
+### Step 4 — Observe the Deferred Message
 
-1. To receive a deferred message, you must use its **Sequence Number**
-2. In Service Bus Explorer, use the **Receive** mode with the sequence number filter
-3. Enter the sequence number you noted in Step 3
-4. The deferred **Fueling** message is returned
-5. Click **Complete** to finish processing
+> **⚠ Portal Limitation:** The Service Bus Explorer in the Portal **cannot retrieve deferred messages by sequence number**. This is an SDK-only operation (`ReceiveDeferredMessageAsync(sequenceNumber)`). However, you can still **observe** deferred messages.
+
+1. **Peek from start** — the deferred Fueling message IS visible with its state showing as **Deferred**
+2. Try **Receive** in PeekLock — the deferred message does **NOT** appear (it's skipped)
+3. Check the queue counts:
+
+```bash
+az servicebus queue show \
+  --name aircraft-turnaround \
+  --namespace-name $NAMESPACE \
+  --resource-group $RG \
+  --query "{active: countDetails.activeMessageCount, deadLetter: countDetails.deadLetterMessageCount}"
+```
+
+> The deferred message still counts toward `activeMessageCount`, but it is invisible to normal Receive operations. This is the same behavior you saw in Lab 06 — a discrepancy between the active count and what you can actually receive means deferred messages are present.
+
+In production, retrieving this message would look like this (C# SDK):
+
+```csharp
+// sequenceNumber was stored when the message was deferred
+ServiceBusReceivedMessage deferredMsg = 
+    await receiver.ReceiveDeferredMessageAsync(sequenceNumber);
+await receiver.CompleteMessageAsync(deferredMsg);
+```
 
 ### Step 5 — Observe Queue State with Deferred Messages
 
