@@ -34,7 +34,7 @@ NAMESPACE="sb-transavia-workshop-<your-initials>"
 RG="rg-servicebus-workshop"
 ```
 
-### Step 1 — Create a Queue with a Custom Lock Duration
+### Step 1 — Create a Queue with Lock and Delivery Settings
 
 ```bash
 az servicebus queue create \
@@ -45,9 +45,15 @@ az servicebus queue create \
   --max-delivery-count 3
 ```
 
-> `--lock-duration PT30S` sets the lock to 30 seconds (short for demo purposes). `--max-delivery-count 3` means after 3 failed deliveries, the message goes to dead-letter.
+> `--lock-duration PT30S` sets the lock to 30 seconds. `--max-delivery-count 3` means after 3 failed deliveries, the message goes to dead-letter. These settings matter when consuming via SDK with PeekLock mode.
 
-### Step 2 — Send Crew Assignment Messages
+### Step 2 — Verify Lock Settings in the Portal
+
+1. Navigate to **Queues** → `crew-assignments`
+2. In the **Overview** blade, note the **Lock duration** (30 seconds) and **Max delivery count** (3)
+3. These settings control how PeekLock behaves when applications consume messages via SDK
+
+### Step 3 — Send Crew Assignment Messages
 
 Using Service Bus Explorer, send to `crew-assignments`:
 
@@ -87,49 +93,74 @@ Using Service Bus Explorer, send to `crew-assignments`:
 }
 ```
 
-### Step 3 — Receive in PeekLock Mode (Do Not Complete)
+### Step 4 — Peek Messages (Non-Destructive)
 
-1. In Service Bus Explorer, switch to **Receive** mode
-2. Select **PeekLock** receive mode
-3. Click **Receive** — you get Message 1
-4. **DO NOT click Complete** — wait and observe
+1. In Service Bus Explorer, switch to **Peek** mode
+2. Click **Peek from start** — you see all 3 messages
+3. Note: the messages are still in the queue — peeking does not remove or lock them
 
-### Step 4 — Observe Lock Behavior
+Verify the count has not changed:
 
-While Message 1 is locked:
+```bash
+az servicebus queue show \
+  --name crew-assignments \
+  --namespace-name $NAMESPACE \
+  --resource-group $RG \
+  --query "countDetails.activeMessageCount"
+```
 
-1. Open a **second browser tab** to the same Service Bus Explorer
-2. Try to **Receive** again — you should get **Message 2** (not Message 1)
-3. This proves Message 1 is locked and invisible to other consumers
+> **Peek** is a read-only operation. It does not acquire a lock, does not increment `DeliveryCount`, and does not remove the message. This is what Service Bus Explorer uses for browsing.
 
-### Step 5 — Wait for Lock Expiry
+### Step 5 — Receive a Message (Destructive)
 
-1. Go back to the first tab where Message 1 is locked
-2. Wait 30 seconds (the lock duration we configured)
-3. The lock expires — the message becomes visible again
-4. Receive again — Message 1 reappears, and its **DeliveryCount** is incremented
+1. Switch to **Receive** mode in Service Bus Explorer
+2. Click **Receive messages**
+3. In Settings, select **ReceiveAndDelete** and click **Receive**
+4. You get Message 1 and it is **permanently removed** from the queue
 
-### Step 6 — Complete a Message
+> The Portal's Service Bus Explorer uses **ReceiveAndDelete** mode. The message is deleted the instant it's delivered to you — there is no lock, no Complete, no Abandon.
 
-1. Receive Message 1 again
-2. This time, click **Complete**
-3. The message is permanently removed from the queue
-4. Check the queue count — it should decrease by 1
+3. Verify the count decreased:
 
-### Step 7 — Abandon a Message
+```bash
+az servicebus queue show \
+  --name crew-assignments \
+  --namespace-name $NAMESPACE \
+  --resource-group $RG \
+  --query "countDetails.activeMessageCount"
+```
 
-1. Receive Message 2
-2. Click **Abandon** instead of Complete
-3. The message is immediately released back to the queue (lock released)
-4. The **DeliveryCount** increments
-5. Receive again — Message 2 is immediately available
+### Step 6 — Understand the Difference: Portal vs SDK
 
-### Step 8 — Experiment with ReceiveAndDelete
+The Portal's Service Bus Explorer supports two operations:
 
-1. Send a new test message to the queue
-2. Switch to **ReceiveAndDelete** mode in Service Bus Explorer
-3. Receive the message — it is immediately deleted, no Complete/Abandon options
-4. Confirm the message is gone from the queue
+| Portal Operation | What Happens | Equivalent SDK Mode |
+|---|---|---|
+| **Peek** | Read-only, message stays in queue | `PeekMessageAsync()` |
+| **Receive** | Message is immediately deleted | `ReceiveAndDelete` mode |
+
+The **PeekLock** settlement workflow (Complete, Abandon, Dead-letter, Defer) is only available via **SDK or code**. Here's how it works in production:
+
+```
+1. Consumer calls Receive() in PeekLock mode
+2. Message is LOCKED for the configured lock duration (30s in our case)
+3. No other consumer can see the locked message
+4. Consumer processes the message, then:
+   → Complete()     — message is permanently removed (success)
+   → Abandon()      — lock released, message returns to queue, DeliveryCount++
+   → Dead-letter()  — message moved to DLQ with a reason (poison message)
+   → Defer()        — message can only be retrieved by sequence number later
+5. If the consumer crashes, the lock expires and the message reappears automatically
+```
+
+> **This is the key insight for aviation systems:** PeekLock ensures that if a crew scheduling service crashes mid-processing, the assignment message is NOT lost — it reappears after the lock expires and is picked up by another instance.
+
+### Step 7 — Experiment: Peek vs Receive Side by Side
+
+1. **Peek** the remaining messages — confirm you see Messages 2 and 3
+2. **Receive** one message — Message 2 is gone
+3. **Peek** again — only Message 3 remains
+4. This reinforces: Peek = browse safely, Receive (in Portal) = consume and delete
 
 ---
 
