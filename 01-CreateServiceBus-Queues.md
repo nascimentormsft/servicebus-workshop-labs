@@ -33,46 +33,16 @@ Transavia's booking engine processes thousands of reservations daily. Each booki
 
 ## Exercise Steps
 
-### Step 1 — Set Environment Variables
+### Step 0 — Set Environment Variables
 
-Run this once at the start of the workshop. These variables will be used throughout **all labs**.
+If you haven't already, or if you're starting a new terminal session, set the variables from Lab 00:
 
 ```bash
 NAMESPACE="sb-transavia-workshop-<your-initials>"
 RG="rg-servicebus-workshop"
 ```
 
-> **Note:** Replace `<your-initials>` with your actual initials (e.g., `sb-transavia-workshop-rn`). Namespace names must be globally unique.
-
-### Step 2 — Create a Resource Group
-
-```bash
-az group create \
-  --name $RG \
-  --location westeurope
-```
-
-### Step 3 — Create a Service Bus Namespace
-
-```bash
-az servicebus namespace create \
-  --name $NAMESPACE \
-  --resource-group $RG \
-  --sku Standard \
-  --location westeurope \
-  --disable-local-auth false
-```
-
-> **Why `--disable-local-auth false`?** This explicitly enables SAS key (local) authentication, which is required for **Service Bus Explorer** in the Azure Portal. Without it, you won't be able to send/receive/peek messages through the portal.
-
-### Step 4 — Verify the Namespace in the Portal
-
-1. Open the [Azure Portal](https://portal.azure.com)
-2. Navigate to **Resource Groups** → your resource group
-3. Click on the Service Bus namespace
-4. Observe the **Overview** blade: note the tier, location, and FQDN
-
-### Step 5 — Create a Queue for Booking Confirmations
+### Step 1 — Create a Queue for Booking Confirmations
 
 ```bash
 az servicebus queue create \
@@ -85,7 +55,7 @@ az servicebus queue create \
 
 > The `--default-message-time-to-live P14D` sets the default TTL to 14 days (ISO 8601 duration).
 
-### Step 6 — Create a Second Queue for Baggage Processing
+### Step 2 — Create a Second Queue for Baggage Processing
 
 ```bash
 az servicebus queue create \
@@ -96,7 +66,7 @@ az servicebus queue create \
   --enable-dead-lettering-on-message-expiration true
 ```
 
-### Step 7 — List All Queues
+### Step 3 — List All Queues
 
 ```bash
 az servicebus queue list \
@@ -105,7 +75,7 @@ az servicebus queue list \
   --output table
 ```
 
-### Step 8 — Inspect Queue Properties
+### Step 4 — Inspect Queue Properties
 
 ```bash
 az servicebus queue show \
@@ -120,7 +90,7 @@ Review the JSON output and identify:
 - `lockDuration`
 - `deadLetteringOnMessageExpiration`
 
-### Step 9 — Send a Test Message via Service Bus Explorer
+### Step 5 — Send a Test Message via Service Bus Explorer
 
 1. In the Azure Portal, navigate to your Service Bus namespace
 2. Click on **Queues** → `booking-confirmations`
@@ -143,14 +113,14 @@ Review the JSON output and identify:
 
 7. Click **Send**
 
-### Step 10 — Peek at the Message
+### Step 6 — Peek at the Message
 
 1. In Service Bus Explorer, switch to **Peek** mode
 2. Click **Peek from start**
 3. Verify the message content matches what you sent
 4. Note that peeking does NOT remove the message from the queue
 
-### Step 11 — Receive the Message
+### Step 7 — Receive the Message
 
 1. Switch to **Receive** mode
 2. Select **ReceiveAndDelete** mode

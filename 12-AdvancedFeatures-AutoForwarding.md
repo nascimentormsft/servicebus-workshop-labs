@@ -32,7 +32,7 @@ Auto-forwarding connects these stages without consumer code needing to explicitl
 
 ### Step 0 — Set Environment Variables
 
-If you haven't already, or if you're starting a new terminal session, set the variables from Lab 01:
+If you haven't already, or if you're starting a new terminal session, set the variables from Lab 00:
 
 ```bash
 NAMESPACE="sb-transavia-workshop-<your-initials>"
