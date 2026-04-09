@@ -131,22 +131,13 @@ AzureDiagnostics
 | order by TimeGenerated desc
 ```
 
-**Failed operations:**
+**Operations over time (send, receive, peek):**
 ```kql
 AzureDiagnostics
 | where ResourceProvider == "MICROSOFT.SERVICEBUS"
-| where ResultType != "Success" and ResultType != ""
-| summarize count() by OperationName, ResultType
-| order by count_ desc
-```
-
-**Message count by entity:**
-```kql
-AzureMetrics
-| where ResourceProvider == "MICROSOFT.SERVICEBUS"
-| where MetricName == "ActiveMessages"
-| summarize MaxMessages = max(Maximum) by EntityName = tostring(split(_ResourceId, "/")[-1])
-| order by MaxMessages desc
+| where TimeGenerated > ago(1h)
+| summarize OperationCount = count() by bin(TimeGenerated, 5m), OperationName
+| render timechart
 ```
 
 ### Step 8 — Pin to Azure Dashboard
